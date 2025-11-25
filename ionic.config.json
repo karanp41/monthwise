@@ -1,0 +1,7 @@
+{
+  "name": "MonthWise",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react-vite"
+}
