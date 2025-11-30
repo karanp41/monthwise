@@ -9,7 +9,7 @@ import {
   IonTabs,
   setupIonicReact
 } from '@ionic/react';
-import { ellipse, list, square, triangle } from 'ionicons/icons';
+import { home, receiptOutline, settingsOutline, timeOutline } from 'ionicons/icons';
 import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Dashboard from './pages/Dashboard';
@@ -63,11 +63,8 @@ const ProtectedRoutes: React.FC = () => {
   }
 
   if (!user) {
-    console.log('No user found, redirecting to login');
     return <Redirect to="/login" />;
   }
-
-  console.log('User authenticated, rendering protected routes');
 
   return (
     <IonTabs>
@@ -90,19 +87,19 @@ const ProtectedRoutes: React.FC = () => {
       </IonRouterOutlet>
       <IonTabBar slot="bottom">
         <IonTabButton tab="dashboard" href="/dashboard">
-          <IonIcon aria-hidden="true" icon={triangle} />
-          <IonLabel>Dashboard</IonLabel>
-        </IonTabButton>
-        <IonTabButton tab="history" href="/history">
-          <IonIcon aria-hidden="true" icon={ellipse} />
-          <IonLabel>History</IonLabel>
+          <IonIcon aria-hidden="true" icon={home} />
+          <IonLabel>Home</IonLabel>
         </IonTabButton>
         <IonTabButton tab="manage-bills" href="/manage-bills">
-          <IonIcon aria-hidden="true" icon={list} />
-          <IonLabel>Manage Bills</IonLabel>
+          <IonIcon aria-hidden="true" icon={receiptOutline} />
+          <IonLabel>Bills</IonLabel>
+        </IonTabButton>
+        <IonTabButton tab="history" href="/history">
+          <IonIcon aria-hidden="true" icon={timeOutline} />
+          <IonLabel>History</IonLabel>
         </IonTabButton>
         <IonTabButton tab="settings" href="/settings">
-          <IonIcon aria-hidden="true" icon={square} />
+          <IonIcon aria-hidden="true" icon={settingsOutline} />
           <IonLabel>Settings</IonLabel>
         </IonTabButton>
       </IonTabBar>

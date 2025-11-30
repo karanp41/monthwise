@@ -107,10 +107,13 @@ const Dashboard: React.FC = () => {
   const billsByDate = React.useMemo(() => {
     const map: Record<string, BillWithPaymentStatus[]> = {};
     bills.forEach((bill: BillWithPaymentStatus) => {
-      const dateStr = bill.effective_due_date.split('T')[0]; // Use date string directly to avoid timezone issues
+      const _dateStr = new Date(bill.effective_due_date);
+      const dateStr = _dateStr.getFullYear() + '-' + String(_dateStr.getMonth() + 1).padStart(2, '0') + '-' + String(_dateStr.getDate()).padStart(2, '0');
+
       if (!map[dateStr]) map[dateStr] = [];
       map[dateStr].push(bill);
     });
+
     return map;
   }, [bills]);
 

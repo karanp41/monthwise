@@ -176,6 +176,7 @@ export const billService = {
             // Check if overdue (only for unpaid bills)
             const isOverdue = !isCurrentMonthPaid && daysUntilDue < 0;
 
+
             return {
                 ...bill,
                 is_current_month_paid: isCurrentMonthPaid,
