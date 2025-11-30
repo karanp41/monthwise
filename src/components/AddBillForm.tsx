@@ -72,9 +72,10 @@ const AddBillForm: React.FC<AddBillFormProps> = ({ onSubmit, onCancel, initialDa
             </IonItem>
             {errors.name && <p className="text-red-500 text-sm px-4">{errors.name.message}</p>}
 
-            <IonItem className="mt-4">
+            <IonItem className="mt-2">
                 <IonSelect
                     label="Category"
+                    className='mt-2'
                     labelPlacement="floating"
                     fill="outline"
                     {...control.register('category_id', { required: 'Category is required' })}
@@ -88,8 +89,9 @@ const AddBillForm: React.FC<AddBillFormProps> = ({ onSubmit, onCancel, initialDa
             </IonItem>
             {errors.category_id && <p className="text-red-500 text-sm px-4">{errors.category_id.message}</p>}
 
-            <IonItem className="mt-4">
+            <IonItem className="mt-2">
                 <IonInput
+                    className="mt-2"
                     label="Amount"
                     type="number"
                     labelPlacement="floating"
@@ -99,8 +101,9 @@ const AddBillForm: React.FC<AddBillFormProps> = ({ onSubmit, onCancel, initialDa
             </IonItem>
             {errors.amount && <p className="text-red-500 text-sm px-4">{errors.amount.message}</p>}
 
-            <IonItem className="mt-4">
+            <IonItem className="mt-2">
                 <IonSelect
+                    className="mt-2"
                     label="Currency"
                     labelPlacement="floating"
                     fill="outline"
@@ -115,9 +118,9 @@ const AddBillForm: React.FC<AddBillFormProps> = ({ onSubmit, onCancel, initialDa
             </IonItem>
             {errors.currency && <p className="text-red-500 text-sm px-4">{errors.currency.message}</p>}
 
-            <IonItem className="mt-4">
+            <IonItem className="mt-2">
                 <IonLabel position="stacked">Due Date</IonLabel>
-                <IonDatetimeButton datetime="datetime" />
+                <IonDatetimeButton datetime="datetime" className="mt-2" />
                 <IonModal keepContentsMounted={true}>
                     <Controller
                         control={control}
@@ -134,8 +137,9 @@ const AddBillForm: React.FC<AddBillFormProps> = ({ onSubmit, onCancel, initialDa
                 </IonModal>
             </IonItem>
 
-            <IonItem className="mt-4">
+            <IonItem className="mt-2">
                 <IonSelect
+                    className="mt-2"
                     label="Recurrence"
                     labelPlacement="floating"
                     fill="outline"
@@ -148,11 +152,13 @@ const AddBillForm: React.FC<AddBillFormProps> = ({ onSubmit, onCancel, initialDa
                 </IonSelect>
             </IonItem>
 
-            <IonItem className="mt-4">
+            <IonItem className="mt-2">
                 <IonTextarea
+                    className="mt-2"
                     label="Notes"
                     labelPlacement="floating"
                     fill="outline"
+                    rows={4}
                     {...control.register('notes')}
                 />
             </IonItem>

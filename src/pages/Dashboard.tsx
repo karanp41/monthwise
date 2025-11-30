@@ -19,6 +19,7 @@ import {
   IonRefresherContent,
   IonSegment,
   IonSegmentButton,
+  IonSkeletonText,
   IonTitle,
   IonToggle,
   IonToolbar,
@@ -59,10 +60,12 @@ const Dashboard: React.FC = () => {
   const [calendarDate, setCalendarDate] = useState<Date | null>(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showBillModal, setShowBillModal] = useState(false);
+  const [loading, setLoading] = useState(true);
   const hasFetchedRef = useRef(false);
 
   const fetchBills = useCallback(async () => {
     if (user) {
+      setLoading(true);
       try {
         const [billsData, categoriesData] = await Promise.all([
           billService.getBillsWithPaymentStatus(user.id),
@@ -72,6 +75,8 @@ const Dashboard: React.FC = () => {
         setCategories(categoriesData);
       } catch (error) {
         console.error('Error fetching bills:', error);
+      } finally {
+        setLoading(false);
       }
     }
   }, [user]);
@@ -284,8 +289,19 @@ const Dashboard: React.FC = () => {
     </IonItem>
   );
 
+  const renderSkeletonBillItem = () => (
+    <IonItem lines='none'>
+      <div slot="start" className="w-12 h-6 bg-gray-200 rounded-full mr-4 animate-pulse"></div>
+      <IonLabel>
+        <IonSkeletonText animated style={{ width: '60%', height: '20px' }} />
+        <IonSkeletonText animated style={{ width: '40%', height: '14px', marginTop: '4px' }} />
+      </IonLabel>
+      <IonSkeletonText slot="end" animated style={{ width: '50px', height: '20px' }} />
+    </IonItem>
+  );
+
   return (
-    <IonPage>
+    <IonPage >
       <IonHeader>
         <IonToolbar>
           <IonTitle>Hi, {userProfile?.name || 'User'}</IonTitle>
@@ -401,80 +417,93 @@ const Dashboard: React.FC = () => {
 
         {activeTab === 'overview' ? (
           <>
-            {/* <div className="grid grid-cols-2 gap-4 mb-4">
-              <IonCard className="m-0 bg-red-50 dark:bg-red-900/20">
-                <IonCardHeader>
-                  <IonCardSubtitle>Pending This Month</IonCardSubtitle>
-                  <IonCardTitle className="text-red-600 dark:text-red-400 text-2xl">
-                    {totalPending.toFixed(2)}
-                  </IonCardTitle>
-                </IonCardHeader>
-              </IonCard>
-              <IonCard className="m-0 bg-green-50 dark:bg-green-900/20">
-                <IonCardHeader>
-                  <IonCardSubtitle>Paid This Month</IonCardSubtitle>
-                  <IonCardTitle className="text-green-600 dark:text-green-400 text-2xl">
-                    {totalPaid.toFixed(2)}
-                  </IonCardTitle>
-                </IonCardHeader>
-              </IonCard>
-            </div> */}
+            {loading ? (
+              <>
+                {/* Loading Skeletons */}
+                <IonList inset={true} className="shadow-md !rounded-2xl !m-0 !mb-4 pt-0">
+                  <IonListHeader className="font-semibold">
+                    <IonSkeletonText animated style={{ width: '120px', height: '20px' }} />
+                  </IonListHeader>
+                  {Array.from({ length: 3 }).map((_, idx) => (
+                    <div key={idx}>{renderSkeletonBillItem()}</div>
+                  ))}
+                </IonList>
+                <IonList inset={true} className="shadow-md !rounded-2xl !m-0 !mb-4 pt-0">
+                  <IonListHeader className="font-semibold">
+                    <IonSkeletonText animated style={{ width: '100px', height: '20px' }} />
+                  </IonListHeader>
+                  {Array.from({ length: 2 }).map((_, idx) => (
+                    <div key={idx}>{renderSkeletonBillItem()}</div>
+                  ))}
+                </IonList>
+                <IonList inset={true} className="shadow-md !rounded-2xl !m-0 !mb-4 pt-0">
+                  <IonListHeader className="font-semibold">
+                    <IonSkeletonText animated style={{ width: '110px', height: '20px' }} />
+                  </IonListHeader>
+                  {Array.from({ length: 4 }).map((_, idx) => (
+                    <div key={idx}>{renderSkeletonBillItem()}</div>
+                  ))}
+                </IonList>
+              </>
+            ) : (
+              <>
+                {/* Overdue Bills */}
+                {categorizedBills.overdue.length > 0 && (
+                  <IonList inset={true} className="shadow-md !rounded-2xl !m-0 !mb-4 pt-0">
+                    <IonListHeader color="danger" className="font-semibold">
+                      ⚠️ Overdue ({categorizedBills.overdue.length})
+                    </IonListHeader>
+                    {categorizedBills.overdue.map(renderBillItem)}
+                  </IonList>
+                )}
 
-            {/* Overdue Bills */}
-            {categorizedBills.overdue.length > 0 && (
-              <IonList inset={true} className="shadow-md !rounded-2xl !m-0 !mb-4 pt-0">
-                <IonListHeader color="danger" className="font-semibold">
-                  ⚠️ Overdue ({categorizedBills.overdue.length})
-                </IonListHeader>
-                {categorizedBills.overdue.map(renderBillItem)}
-              </IonList>
-            )}
+                {/* Due Today */}
+                {categorizedBills.dueToday.length > 0 && (
+                  <IonList inset={true} className="shadow-md !rounded-2xl !m-0 !mb-4 pt-0">
+                    <IonListHeader color="warning" className="font-semibold">
+                      🔴 Due Today ({categorizedBills.dueToday.length})
+                    </IonListHeader>
+                    {categorizedBills.dueToday.map(renderBillItem)}
+                  </IonList>
+                )}
 
-            {/* Due Today */}
-            {categorizedBills.dueToday.length > 0 && (
-              <IonList inset={true} className="shadow-md !rounded-2xl !m-0 !mb-4 pt-0">
-                <IonListHeader color="warning" className="font-semibold">
-                  🔴 Due Today ({categorizedBills.dueToday.length})
-                </IonListHeader>
-                {categorizedBills.dueToday.map(renderBillItem)}
-              </IonList>
-            )}
+                {/* Due Tomorrow */}
+                {categorizedBills.dueTomorrow.length > 0 && (
+                  <IonList inset={true} className="shadow-md !rounded-2xl !m-0 !mb-4 pt-0">
+                    <IonListHeader color="primary" className="font-semibold">
+                      🟠 Due Tomorrow ({categorizedBills.dueTomorrow.length})
+                    </IonListHeader>
+                    {categorizedBills.dueTomorrow.map(renderBillItem)}
+                  </IonList>
+                )}
 
-            {/* Due Tomorrow */}
-            {categorizedBills.dueTomorrow.length > 0 && (
-              <IonList inset={true} className="shadow-md !rounded-2xl !m-0 !mb-4 pt-0">
-                <IonListHeader color="primary" className="font-semibold">
-                  🟠 Due Tomorrow ({categorizedBills.dueTomorrow.length})
-                </IonListHeader>
-                {categorizedBills.dueTomorrow.map(renderBillItem)}
-              </IonList>
-            )}
+                {/* Due Within 7 Days */}
+                {categorizedBills.dueWithin7Days.length > 0 && (
+                  <IonList inset={true} className="shadow-md !rounded-2xl !m-0 !mb-4 pt-0">
+                    <IonListHeader className="font-semibold">
+                      🟡 Due Within 7 Days ({categorizedBills.dueWithin7Days.length})
+                    </IonListHeader>
+                    {categorizedBills.dueWithin7Days.map(renderBillItem)}
+                  </IonList>
+                )}
 
-            {/* Due Within 7 Days */}
-            {categorizedBills.dueWithin7Days.length > 0 && (
-              <IonList inset={true} className="shadow-md !rounded-2xl !m-0 !mb-4 pt-0">
-                <IonListHeader className="font-semibold">
-                  🟡 Due Within 7 Days ({categorizedBills.dueWithin7Days.length})
-                </IonListHeader>
-                {categorizedBills.dueWithin7Days.map(renderBillItem)}
-              </IonList>
-            )}
+                {/* Due Next 15 Days */}
+                {categorizedBills.dueNext15Days.length > 0 && (
+                  <IonList inset={true} className="shadow-md !rounded-2xl !m-0 !mb-4 pt-0">
+                    <IonListHeader className="font-semibold">
+                      🟢 Due Next 15 Days ({categorizedBills.dueNext15Days.length})
+                    </IonListHeader>
+                    {categorizedBills.dueNext15Days.map(renderBillItem)}
+                  </IonList>
+                )}
 
-            {/* Due Next 15 Days */}
-            {categorizedBills.dueNext15Days.length > 0 && (
-              <IonList inset={true} className="shadow-md !rounded-2xl !m-0 !mb-4 pt-0">
-                <IonListHeader className="font-semibold">
-                  🟢 Due Next 15 Days ({categorizedBills.dueNext15Days.length})
-                </IonListHeader>
-                {categorizedBills.dueNext15Days.map(renderBillItem)}
-              </IonList>
-            )}
-
-            {/* No bills message */}
-            {bills.length === 0 && (
-              <IonCard className="text-center p-8">
-                <p className="text-gray-500">No bills added yet. Click + to add your first bill.</p>
-              </IonCard>
+                {/* No bills message */}
+                {bills.length === 0 && (
+                  <IonCard className="text-center p-8">
+                    <p className="text-gray-500">No bills added yet. Click + to add your first bill.</p>
+                  </IonCard>
+                )}
+              </>
             )}
           </>
         ) : (
@@ -482,7 +511,11 @@ const Dashboard: React.FC = () => {
             <div className="mb-6">
               <h2 className="text-lg font-semibold p-4">This Month's Bills</h2>
               <IonList inset={true} className='p-0 !m-0'>
-                {getCurrentMonthBills().length === 0 ? (
+                {loading ? (
+                  Array.from({ length: 5 }).map((_, idx) => (
+                    <div key={idx}>{renderSkeletonBillItem()}</div>
+                  ))
+                ) : getCurrentMonthBills().length === 0 ? (
                   <div className="text-center p-4 text-gray-500">
                     No bills for this month.
                   </div>

@@ -85,12 +85,7 @@ const Settings: React.FC = () => {
             </IonLabel>
           </IonItem>
 
-          <div className="p-4">
-            <IonButton expand="block" color="danger" onClick={signOut}>
-              <IonIcon slot="start" icon={logOutOutline} />
-              Sign Out
-            </IonButton>
-          </div>
+
           <IonItem>
             <IonLabel position="stacked">Default Currency</IonLabel>
             <IonSelect
@@ -106,6 +101,13 @@ const Settings: React.FC = () => {
               ))}
             </IonSelect>
           </IonItem>
+
+          <div className="p-4 border-t mt-4">
+            <IonButton expand="block" color="danger" onClick={signOut}>
+              <IonIcon slot="start" icon={logOutOutline} />
+              Sign Out
+            </IonButton>
+          </div>
         </IonList>
       </IonContent>
     </IonPage>
