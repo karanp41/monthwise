@@ -14,6 +14,7 @@ import {
     IonList,
     IonModal,
     IonPage,
+    IonSkeletonText,
     IonTitle,
     IonToolbar,
     useIonAlert,
@@ -36,11 +37,13 @@ const ManageBills: React.FC = () => {
     const [userProfile, setUserProfile] = useState<User | null>(null);
     const [showAddModal, setShowAddModal] = useState(false);
     const [editingBill, setEditingBill] = useState<Bill | null>(null);
+    const [loading, setLoading] = useState(true);
     const [presentAlert] = useIonAlert();
     const [presentToast] = useIonToast();
 
     const fetchData = useCallback(async () => {
         if (user) {
+            setLoading(true);
             try {
                 const storageKey = `userProfile_${user.id}`;
                 const stored = localStorage.getItem(storageKey);
@@ -65,6 +68,8 @@ const ManageBills: React.FC = () => {
                 setCategories(categoriesData);
             } catch (error) {
                 console.error('Error fetching data:', error);
+            } finally {
+                setLoading(false);
             }
         }
     }, [user]);
@@ -176,6 +181,20 @@ const ManageBills: React.FC = () => {
         }
     };
 
+    const renderSkeletonBillItem = () => (
+        <IonItem className="mb-2">
+            <IonLabel>
+                <IonSkeletonText animated style={{ width: '60%', height: '20px' }} />
+                <IonSkeletonText animated style={{ width: '80%', height: '14px', marginTop: '4px' }} />
+                <IonSkeletonText animated style={{ width: '50%', height: '12px', marginTop: '2px' }} />
+            </IonLabel>
+            <div slot="end" className="flex gap-2">
+                <div className="w-8 h-8 bg-gray-200 rounded animate-pulse"></div>
+                <div className="w-8 h-8 bg-gray-200 rounded animate-pulse"></div>
+            </div>
+        </IonItem>
+    );
+
     return (
         <IonPage>
             <IonHeader>
@@ -186,10 +205,31 @@ const ManageBills: React.FC = () => {
             <IonContent fullscreen>
                 <IonCard>
                     <IonCardHeader>
-                        <IonCardTitle>Bills by Category ({bills.length})</IonCardTitle>
+                        <IonCardTitle>
+                            Bills by Category {loading ? '' : `(${bills.length})`}
+                        </IonCardTitle>
                     </IonCardHeader>
                     <IonCardContent>
-                        {bills.length === 0 ? (
+                        {loading ? (
+                            <>
+                                <h3 className="text-lg font-semibold mb-2">
+                                    <IonSkeletonText animated style={{ width: '150px', height: '24px' }} />
+                                </h3>
+                                <IonList>
+                                    {Array.from({ length: 4 }).map((_, idx) => (
+                                        <div key={idx}>{renderSkeletonBillItem()}</div>
+                                    ))}
+                                </IonList>
+                                <h3 className="text-lg font-semibold mb-2 mt-4">
+                                    <IonSkeletonText animated style={{ width: '120px', height: '24px' }} />
+                                </h3>
+                                <IonList>
+                                    {Array.from({ length: 3 }).map((_, idx) => (
+                                        <div key={idx}>{renderSkeletonBillItem()}</div>
+                                    ))}
+                                </IonList>
+                            </>
+                        ) : bills.length === 0 ? (
                             <div className="text-center p-4 text-gray-500">
                                 No bills found. Add your first bill below.
                             </div>

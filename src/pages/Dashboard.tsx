@@ -301,7 +301,7 @@ const Dashboard: React.FC = () => {
   );
 
   return (
-    <IonPage >
+    <IonPage>
       <IonHeader>
         <IonToolbar>
           <IonTitle>Hi, {userProfile?.name || 'User'}</IonTitle>

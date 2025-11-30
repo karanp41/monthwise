@@ -7,6 +7,7 @@ import {
   IonList,
   IonNote,
   IonPage,
+  IonSkeletonText,
   IonTitle,
   IonToolbar,
 } from '@ionic/react';
@@ -30,10 +31,12 @@ const HistoryPage: React.FC = () => {
   const { user } = useAuth();
   const [payments, setPayments] = useState<PaymentWithBill[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchHistory = async () => {
       if (user) {
+        setLoading(true);
         try {
           const [paymentsData, categoriesData] = await Promise.all([
             billService.getAllPaymentHistory(user.id),
@@ -43,6 +46,8 @@ const HistoryPage: React.FC = () => {
           setCategories(categoriesData);
         } catch (error) {
           console.error('Error fetching history:', error);
+        } finally {
+          setLoading(false);
         }
       }
     };
@@ -62,6 +67,18 @@ const HistoryPage: React.FC = () => {
     return payment.bills?.category_id || '';
   };
 
+  const renderSkeletonPaymentItem = () => (
+    <IonItem>
+      <div slot="start" className="w-6 h-6 bg-gray-200 rounded-full mr-4 animate-pulse"></div>
+      <IonLabel>
+        <IonSkeletonText animated style={{ width: '60%', height: '20px' }} />
+        <IonSkeletonText animated style={{ width: '80%', height: '14px', marginTop: '4px' }} />
+        <IonSkeletonText animated style={{ width: '40%', height: '12px', marginTop: '2px' }} />
+      </IonLabel>
+      <IonSkeletonText slot="end" animated style={{ width: '50px', height: '20px' }} />
+    </IonItem>
+  );
+
   return (
     <IonPage>
       <IonHeader>
@@ -71,7 +88,11 @@ const HistoryPage: React.FC = () => {
       </IonHeader>
       <IonContent fullscreen>
         <IonList inset={true}>
-          {payments.length === 0 ? (
+          {loading ? (
+            Array.from({ length: 5 }).map((_, idx) => (
+              <div key={idx}>{renderSkeletonPaymentItem()}</div>
+            ))
+          ) : payments.length === 0 ? (
             <div className="text-center p-4 text-gray-500">
               No payment history yet.
             </div>
