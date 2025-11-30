@@ -128,15 +128,23 @@ const Dashboard: React.FC = () => {
     });
   };
 
-  const handleAddBill = async (data: Omit<Bill, 'id' | 'created_at' | 'updated_at' | 'user_id' | 'is_paid'>) => {
+  const handleAddBill = async (data: Omit<Bill, 'id' | 'created_at' | 'updated_at' | 'user_id' | 'is_paid'> & { reminder: string }) => {
     if (user) {
       try {
+        const { reminder, ...billData } = data;
+        const notify_before_days = reminder === 'never' ? 0 : parseInt(reminder, 10);
         const newBill = await billService.addBill({
-          ...data,
+          ...billData,
           user_id: user.id,
           is_paid: false,
         });
-        await reminderService.scheduleBillReminders(newBill);
+        if (notify_before_days > 0) {
+          await reminderService.createReminder({
+            bill_id: newBill.id,
+            notify_before_days,
+          });
+        }
+        await reminderService.scheduleBillReminders({ ...newBill, notify_before_days });
         setShowAddModal(false);
         fetchBills();
         presentToast({
@@ -315,7 +323,7 @@ const Dashboard: React.FC = () => {
         {/* Calendar Overview */}
         <div className="dashboard-calendar-container mb-6">
           <Calendar
-            className="border rounded-lg shadow-md"
+            className="border rounded-lg shadow-md bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
             value={calendarDate}
             onChange={
               // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -18,7 +18,7 @@ import { categoryService } from '../services/categoryService';
 import { allCurrencies, getCurrencySymbol } from '../services/utilService';
 
 interface AddBillFormProps {
-    onSubmit: (data: Omit<Bill, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'is_paid'>) => void;
+    onSubmit: (data: Omit<Bill, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'is_paid'> & { reminder: string }) => void;
     onCancel: () => void;
     initialData?: Bill;
     submitButtonText?: string;
@@ -28,7 +28,7 @@ interface AddBillFormProps {
 const AddBillForm: React.FC<AddBillFormProps> = ({ onSubmit, onCancel, initialData, submitButtonText = 'Add Bill', defaultCurrency = 'USD' }) => {
     const { user } = useAuth();
     const [categories, setCategories] = useState<Category[]>([]);
-    const { control, handleSubmit, formState: { errors }, reset } = useForm<Omit<Bill, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'is_paid'>>({
+    const { control, handleSubmit, formState: { errors }, reset } = useForm<Omit<Bill, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'is_paid'> & { reminder: string }>({
         defaultValues: {
             name: initialData?.name || '',
             amount: initialData?.amount || 0,
@@ -37,6 +37,7 @@ const AddBillForm: React.FC<AddBillFormProps> = ({ onSubmit, onCancel, initialDa
             recurrence: initialData?.recurrence || 'monthly',
             category_id: initialData?.category_id || '',
             notes: initialData?.notes || '',
+            reminder: 'never',
         }
     });
 
@@ -162,6 +163,22 @@ const AddBillForm: React.FC<AddBillFormProps> = ({ onSubmit, onCancel, initialDa
                     {...control.register('notes')}
                 />
             </IonItem>
+
+            <IonItem className="mt-2">
+                <IonSelect
+                    className="mt-2"
+                    label="Reminder"
+                    labelPlacement="floating"
+                    fill="outline"
+                    {...control.register('reminder', { required: 'Reminder is required' })}
+                >
+                    <IonSelectOption value="never">Never remind</IonSelectOption>
+                    <IonSelectOption value="1">Remind 1 Day before</IonSelectOption>
+                    <IonSelectOption value="3">Remind 3 Days before</IonSelectOption>
+                    <IonSelectOption value="7">Remind 7 Days before</IonSelectOption>
+                </IonSelect>
+            </IonItem>
+            {errors.reminder && <p className="text-red-500 text-sm px-4">{errors.reminder.message}</p>}
 
             <div className="flex justify-end gap-2 mt-6">
                 <IonButton fill="clear" color="medium" onClick={onCancel}>
