@@ -15,19 +15,28 @@ import { Controller, useForm } from 'react-hook-form';
 import { useAuth } from '../context/AuthContext';
 import { Bill, Category } from '../models/types';
 import { categoryService } from '../services/categoryService';
+import { allCurrencies, getCurrencySymbol } from '../services/utilService';
 
 interface AddBillFormProps {
     onSubmit: (data: Omit<Bill, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'is_paid'>) => void;
     onCancel: () => void;
+    initialData?: Bill;
+    submitButtonText?: string;
+    defaultCurrency?: string;
 }
 
-const AddBillForm: React.FC<AddBillFormProps> = ({ onSubmit, onCancel }) => {
+const AddBillForm: React.FC<AddBillFormProps> = ({ onSubmit, onCancel, initialData, submitButtonText = 'Add Bill', defaultCurrency = 'USD' }) => {
     const { user } = useAuth();
     const [categories, setCategories] = useState<Category[]>([]);
-    const { control, handleSubmit, formState: { errors } } = useForm<Omit<Bill, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'is_paid'>>({
+    const { control, handleSubmit, formState: { errors }, reset } = useForm<Omit<Bill, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'is_paid'>>({
         defaultValues: {
-            recurrence: 'monthly',
-            due_date: new Date().toISOString(),
+            name: initialData?.name || '',
+            amount: initialData?.amount || 0,
+            currency: initialData?.currency || defaultCurrency,
+            due_date: initialData?.due_date || new Date().toISOString(),
+            recurrence: initialData?.recurrence || 'monthly',
+            category_id: initialData?.category_id || '',
+            notes: initialData?.notes || '',
         }
     });
 
@@ -36,6 +45,20 @@ const AddBillForm: React.FC<AddBillFormProps> = ({ onSubmit, onCancel }) => {
             categoryService.getCategories(user.id).then(setCategories).catch(console.error);
         }
     }, [user]);
+
+    useEffect(() => {
+        if (initialData) {
+            reset({
+                name: initialData.name,
+                amount: initialData.amount,
+                currency: initialData.currency,
+                due_date: initialData.due_date,
+                recurrence: initialData.recurrence,
+                category_id: initialData.category_id,
+                notes: initialData.notes || '',
+            });
+        }
+    }, [initialData, reset]);
 
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="p-4">
@@ -77,6 +100,22 @@ const AddBillForm: React.FC<AddBillFormProps> = ({ onSubmit, onCancel }) => {
             {errors.amount && <p className="text-red-500 text-sm px-4">{errors.amount.message}</p>}
 
             <IonItem className="mt-4">
+                <IonSelect
+                    label="Currency"
+                    labelPlacement="floating"
+                    fill="outline"
+                    {...control.register('currency', { required: 'Currency is required' })}
+                >
+                    {Object.keys(allCurrencies).map((code) => (
+                        <IonSelectOption key={code} value={code}>
+                            {code} ({getCurrencySymbol(code)})
+                        </IonSelectOption>
+                    ))}
+                </IonSelect>
+            </IonItem>
+            {errors.currency && <p className="text-red-500 text-sm px-4">{errors.currency.message}</p>}
+
+            <IonItem className="mt-4">
                 <IonLabel position="stacked">Due Date</IonLabel>
                 <IonDatetimeButton datetime="datetime" />
                 <IonModal keepContentsMounted={true}>
@@ -103,6 +142,7 @@ const AddBillForm: React.FC<AddBillFormProps> = ({ onSubmit, onCancel }) => {
                     {...control.register('recurrence')}
                 >
                     <IonSelectOption value="monthly">Monthly</IonSelectOption>
+                    <IonSelectOption value="quarterly">Quarterly</IonSelectOption>
                     <IonSelectOption value="yearly">Yearly</IonSelectOption>
                     <IonSelectOption value="none">None</IonSelectOption>
                 </IonSelect>
@@ -122,7 +162,7 @@ const AddBillForm: React.FC<AddBillFormProps> = ({ onSubmit, onCancel }) => {
                     Cancel
                 </IonButton>
                 <IonButton type="submit" expand="block">
-                    Add Bill
+                    {submitButtonText}
                 </IonButton>
             </div>
         </form>

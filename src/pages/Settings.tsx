@@ -7,16 +7,53 @@ import {
   IonLabel,
   IonList,
   IonPage,
+  IonSelect,
+  IonSelectOption,
   IonTitle,
   IonToolbar,
+  useIonToast,
 } from '@ionic/react';
 import { logOutOutline } from 'ionicons/icons';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { User } from '../models/types';
+import { userService } from '../services/userService';
+import { allCurrencies, getCurrencySymbol } from '../services/utilService';
 import './Settings.css';
 
 const Settings: React.FC = () => {
   const { user, signOut } = useAuth();
+  const [userProfile, setUserProfile] = useState<User | null>(null);
+  const [selectedCurrency, setSelectedCurrency] = useState<string>('USD');
+  const [presentToast] = useIonToast();
+
+  useEffect(() => {
+    if (user) {
+      userService.getUser(user.id).then((data) => {
+        setUserProfile(data);
+        setSelectedCurrency(data?.default_currency || 'USD');
+      }).catch(console.error);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (userProfile?.default_currency) {
+      setSelectedCurrency(userProfile.default_currency);
+    }
+  }, [userProfile]);
+
+  const handleCurrencyChange = async (val: string) => {
+    if (!user) return;
+    try {
+      const updated = await userService.updateUser(user.id, { default_currency: val });
+      setUserProfile(updated);
+      setSelectedCurrency(val);
+      presentToast({ message: 'Default currency updated', duration: 2000, color: 'success' });
+    } catch (err) {
+      console.error(err);
+      presentToast({ message: 'Failed to update currency', duration: 2000, color: 'danger' });
+    }
+  };
 
   return (
     <IonPage>
@@ -40,6 +77,21 @@ const Settings: React.FC = () => {
               Sign Out
             </IonButton>
           </div>
+          <IonItem>
+            <IonLabel position="stacked">Default Currency</IonLabel>
+            <IonSelect
+              value={selectedCurrency}
+              placeholder="Select Currency"
+              onIonChange={(e) => handleCurrencyChange(e.detail.value!)}
+            >
+
+              {Object.keys(allCurrencies).map((code) => (
+                <IonSelectOption key={code} value={code}>
+                  {code} ({getCurrencySymbol(code)})
+                </IonSelectOption>
+              ))}
+            </IonSelect>
+          </IonItem>
         </IonList>
       </IonContent>
     </IonPage>

@@ -1,16 +1,32 @@
 import { Category } from '../models/types';
 import { supabase } from './supabase';
 
+// Simple in-memory map to deduplicate concurrent requests.
+const pendingRequests: Map<string, Promise<unknown>> = new Map();
+
 export const categoryService = {
     async getCategories(userId: string) {
-        const { data, error } = await supabase
-            .from('categories')
-            .select('*')
-            .eq('user_id', userId)
-            .order('name', { ascending: true });
+        const key = `getCategories:${userId}`;
+        if (pendingRequests.has(key)) return pendingRequests.get(key) as Promise<Category[]>;
 
-        if (error) throw error;
-        return data as Category[];
+        const p = (async () => {
+            const { data, error } = await supabase
+                .from('categories')
+                .select('*')
+                .eq('user_id', userId)
+                .order('name', { ascending: true });
+
+            if (error) throw error;
+            return data as Category[];
+        })();
+
+        pendingRequests.set(key, p);
+        try {
+            const res = await p;
+            return res;
+        } finally {
+            pendingRequests.delete(key);
+        }
     },
 
     async createCategory(category: Omit<Category, 'id'>) {

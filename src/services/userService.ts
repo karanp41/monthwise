@@ -1,6 +1,9 @@
 import { User } from '../models/types';
 import { supabase } from './supabase';
 
+// Simple in-memory map to deduplicate concurrent requests.
+const pendingRequests: Map<string, Promise<unknown>> = new Map();
+
 export const userService = {
     async createUser(userId: string, email: string, name: string) {
         const { data, error } = await supabase
@@ -10,6 +13,7 @@ export const userService = {
                     id: userId,
                     email,
                     name,
+                    default_currency: 'USD',
                 }
             ])
             .select()
@@ -20,14 +24,27 @@ export const userService = {
     },
 
     async getUser(userId: string) {
-        const { data, error } = await supabase
-            .from('users')
-            .select('*')
-            .eq('id', userId)
-            .single();
+        const key = `getUser:${userId}`;
+        if (pendingRequests.has(key)) return pendingRequests.get(key) as Promise<User>;
 
-        if (error) throw error;
-        return data as User;
+        const p = (async () => {
+            const { data, error } = await supabase
+                .from('users')
+                .select('*')
+                .eq('id', userId)
+                .single();
+
+            if (error) throw error;
+            return data as User;
+        })();
+
+        pendingRequests.set(key, p);
+        try {
+            const res = await p;
+            return res;
+        } finally {
+            pendingRequests.delete(key);
+        }
     },
 
     async updateUser(userId: string, updates: Partial<User>) {

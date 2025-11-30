@@ -9,12 +9,13 @@ import {
   IonTabs,
   setupIonicReact
 } from '@ionic/react';
-import { ellipse, square, triangle } from 'ionicons/icons';
+import { ellipse, list, square, triangle } from 'ionicons/icons';
 import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Dashboard from './pages/Dashboard';
 import HistoryPage from './pages/History';
 import Login from './pages/Login';
+import ManageBills from './pages/ManageBills';
 import Settings from './pages/Settings';
 import Signup from './pages/Signup';
 
@@ -77,6 +78,9 @@ const ProtectedRoutes: React.FC = () => {
         <Route exact path="/history">
           <HistoryPage />
         </Route>
+        <Route exact path="/manage-bills">
+          <ManageBills />
+        </Route>
         <Route path="/settings">
           <Settings />
         </Route>
@@ -92,6 +96,10 @@ const ProtectedRoutes: React.FC = () => {
         <IonTabButton tab="history" href="/history">
           <IonIcon aria-hidden="true" icon={ellipse} />
           <IonLabel>History</IonLabel>
+        </IonTabButton>
+        <IonTabButton tab="manage-bills" href="/manage-bills">
+          <IonIcon aria-hidden="true" icon={list} />
+          <IonLabel>Manage Bills</IonLabel>
         </IonTabButton>
         <IonTabButton tab="settings" href="/settings">
           <IonIcon aria-hidden="true" icon={square} />
