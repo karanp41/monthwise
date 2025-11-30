@@ -1,9 +1,6 @@
 import {
   IonBadge,
   IonCard,
-  IonCardHeader,
-  IonCardSubtitle,
-  IonCardTitle,
   IonContent,
   IonFab,
   IonFabButton,
@@ -177,8 +174,8 @@ const Dashboard: React.FC = () => {
   };
 
   const categorizedBills = categorizeBills();
-  const totalPending = bills.filter(b => !b.is_current_month_paid).reduce((sum, bill) => sum + bill.amount, 0);
-  const totalPaid = bills.filter(b => b.is_current_month_paid).reduce((sum, bill) => sum + bill.amount, 0);
+  // const totalPending = bills.filter(b => !b.is_current_month_paid).reduce((sum, bill) => sum + bill.amount, 0);
+  // const totalPaid = bills.filter(b => b.is_current_month_paid).reduce((sum, bill) => sum + bill.amount, 0);
 
   const getCategoryName = (categoryId: string) => {
     const category = categories.find(c => c.id === categoryId);
@@ -250,12 +247,12 @@ const Dashboard: React.FC = () => {
 
   return (
     <IonPage>
-      <IonHeader>
+      {/* <IonHeader>
         <IonToolbar>
           <IonTitle>MonthWise</IonTitle>
         </IonToolbar>
-      </IonHeader>
-      <IonContent fullscreen>
+      </IonHeader> */}
+      <IonContent fullscreen className="ion-padding">
         <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
           <IonRefresherContent />
         </IonRefresher>
@@ -276,30 +273,30 @@ const Dashboard: React.FC = () => {
 
         {activeTab === 'overview' ? (
           <>
-            <div className="grid grid-cols-2 gap-4 mb-4 p-4">
+            {/* <div className="grid grid-cols-2 gap-4 mb-4">
               <IonCard className="m-0 bg-red-50 dark:bg-red-900/20">
                 <IonCardHeader>
                   <IonCardSubtitle>Pending This Month</IonCardSubtitle>
-                  <IonCardTitle className="text-red-600 dark:text-red-400">
-                    ${totalPending.toFixed(2)}
+                  <IonCardTitle className="text-red-600 dark:text-red-400 text-2xl">
+                    {totalPending.toFixed(2)}
                   </IonCardTitle>
                 </IonCardHeader>
               </IonCard>
               <IonCard className="m-0 bg-green-50 dark:bg-green-900/20">
                 <IonCardHeader>
                   <IonCardSubtitle>Paid This Month</IonCardSubtitle>
-                  <IonCardTitle className="text-green-600 dark:text-green-400">
-                    ${totalPaid.toFixed(2)}
+                  <IonCardTitle className="text-green-600 dark:text-green-400 text-2xl">
+                    {totalPaid.toFixed(2)}
                   </IonCardTitle>
                 </IonCardHeader>
               </IonCard>
-            </div>
+            </div> */}
 
             {/* Overdue Bills */}
             {categorizedBills.overdue.length > 0 && (
-              <IonList inset={true} className="mb-4 shadow-md !rounded-2xl pt-0">
-                <IonListHeader color="danger">
-                  <h2 className="font-semibold">⚠️ Overdue ({categorizedBills.overdue.length})</h2>
+              <IonList inset={true} className="shadow-md !rounded-2xl !m-0 !mb-4 pt-0">
+                <IonListHeader color="danger" className="font-semibold">
+                  ⚠️ Overdue ({categorizedBills.overdue.length})
                 </IonListHeader>
                 {categorizedBills.overdue.map(renderBillItem)}
               </IonList>
@@ -307,9 +304,9 @@ const Dashboard: React.FC = () => {
 
             {/* Due Today */}
             {categorizedBills.dueToday.length > 0 && (
-              <IonList inset={true} className="mb-4 shadow-md !rounded-2xl pt-0">
-                <IonListHeader color="warning" className="rounded-xl">
-                  <h2 className="font-semibold">🔴 Due Today ({categorizedBills.dueToday.length})</h2>
+              <IonList inset={true} className="shadow-md !rounded-2xl !m-0 !mb-4 pt-0">
+                <IonListHeader color="warning" className="font-semibold">
+                  🔴 Due Today ({categorizedBills.dueToday.length})
                 </IonListHeader>
                 {categorizedBills.dueToday.map(renderBillItem)}
               </IonList>
@@ -317,9 +314,9 @@ const Dashboard: React.FC = () => {
 
             {/* Due Tomorrow */}
             {categorizedBills.dueTomorrow.length > 0 && (
-              <IonList inset={true} className="mb-4 shadow-md !rounded-2xl pt-0">
-                <IonListHeader color="primary" className="rounded-xl">
-                  <h2 className="font-semibold">🟠 Due Tomorrow ({categorizedBills.dueTomorrow.length})</h2>
+              <IonList inset={true} className="shadow-md !rounded-2xl !m-0 !mb-4 pt-0">
+                <IonListHeader color="primary" className="font-semibold">
+                  🟠 Due Tomorrow ({categorizedBills.dueTomorrow.length})
                 </IonListHeader>
                 {categorizedBills.dueTomorrow.map(renderBillItem)}
               </IonList>
@@ -327,9 +324,9 @@ const Dashboard: React.FC = () => {
 
             {/* Due Within 7 Days */}
             {categorizedBills.dueWithin7Days.length > 0 && (
-              <IonList inset={true} className="mb-4 shadow-md !rounded-2xl pt-0">
-                <IonListHeader>
-                  <h2 className="font-semibold">🟡 Due Within 7 Days ({categorizedBills.dueWithin7Days.length})</h2>
+              <IonList inset={true} className="shadow-md !rounded-2xl !m-0 !mb-4 pt-0">
+                <IonListHeader className="font-semibold">
+                  🟡 Due Within 7 Days ({categorizedBills.dueWithin7Days.length})
                 </IonListHeader>
                 {categorizedBills.dueWithin7Days.map(renderBillItem)}
               </IonList>
@@ -337,9 +334,9 @@ const Dashboard: React.FC = () => {
 
             {/* Due Next 15 Days */}
             {categorizedBills.dueNext15Days.length > 0 && (
-              <IonList inset={true} className="mb-4 shadow-md !rounded-2xl pt-0">
-                <IonListHeader>
-                  <h2 className="font-semibold">🟢 Due Next 15 Days ({categorizedBills.dueNext15Days.length})</h2>
+              <IonList inset={true} className="shadow-md !rounded-2xl !m-0 !mb-4 pt-0">
+                <IonListHeader className="font-semibold">
+                  🟢 Due Next 15 Days ({categorizedBills.dueNext15Days.length})
                 </IonListHeader>
                 {categorizedBills.dueNext15Days.map(renderBillItem)}
               </IonList>
@@ -356,7 +353,7 @@ const Dashboard: React.FC = () => {
           <>
             <div className="mb-6">
               <h2 className="text-lg font-semibold p-4">This Month's Bills</h2>
-              <IonList inset={true} className='p-0'>
+              <IonList inset={true} className='p-0 !m-0'>
                 {getCurrentMonthBills().length === 0 ? (
                   <div className="text-center p-4 text-gray-500">
                     No bills for this month.
@@ -381,7 +378,7 @@ const Dashboard: React.FC = () => {
                           <h2>{bill.name}</h2>
                           <p>{getCategoryName(bill.category_id)} • {formatDueDate(bill)}</p>
                         </IonLabel>
-                        <IonNote slot="end" color={bill.is_current_month_paid ? 'success' : 'dark'}>
+                        <IonNote slot="end" className='text-md' color={bill.is_current_month_paid ? 'success' : 'dark'}>
                           {getCurrencySymbol(bill.currency)}{bill.amount.toFixed(2)}
                         </IonNote>
                       </IonItem>

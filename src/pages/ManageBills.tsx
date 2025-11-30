@@ -27,6 +27,7 @@ import { Bill, Category, User } from '../models/types';
 import { billService } from '../services/billService';
 import { categoryService } from '../services/categoryService';
 import { userService } from '../services/userService';
+import { getCurrencySymbol } from '../services/utilService';
 
 const ManageBills: React.FC = () => {
     const { user } = useAuth();
@@ -170,53 +171,115 @@ const ManageBills: React.FC = () => {
                 </IonToolbar>
             </IonHeader>
             <IonContent fullscreen>
-                <div className="p-4">
-                    <IonCard>
-                        <IonCardHeader>
-                            <IonCardTitle>All Bills ({bills.length})</IonCardTitle>
-                        </IonCardHeader>
-                        <IonCardContent>
-                            <IonList>
-                                {bills.length === 0 ? (
-                                    <div className="text-center p-4 text-gray-500">
-                                        No bills found. Add your first bill below.
-                                    </div>
-                                ) : (
-                                    bills.map((bill) => (
-                                        <IonItem key={bill.id} className="mb-2">
-                                            <IonLabel>
-                                                <h2 className="font-semibold">{bill.name}</h2>
-                                                <p className="text-sm text-gray-600">
-                                                    {getCategoryName(bill.category_id)} •
-                                                    Due: {new Date(bill.due_date).toLocaleDateString()} •
-                                                    {formatRecurrence(bill.recurrence)} •
-                                                    ${bill.amount.toFixed(2)}
-                                                </p>
-                                                {bill.notes && (
-                                                    <p className="text-sm text-gray-500 mt-1">{bill.notes}</p>
-                                                )}
-                                            </IonLabel>
-                                            <IonButton
-                                                fill="clear"
-                                                slot="end"
-                                                onClick={() => setEditingBill(bill)}
-                                            >
-                                                <IonIcon icon={create} color="primary" />
-                                            </IonButton>
-                                            <IonButton
-                                                fill="clear"
-                                                slot="end"
-                                                onClick={() => handleDeleteBill(bill)}
-                                            >
-                                                <IonIcon icon={trash} color="danger" />
-                                            </IonButton>
-                                        </IonItem>
-                                    ))
-                                )}
-                            </IonList>
-                        </IonCardContent>
-                    </IonCard>
-                </div>
+                <IonCard>
+                    <IonCardHeader>
+                        <IonCardTitle>Bills by Category ({bills.length})</IonCardTitle>
+                    </IonCardHeader>
+                    <IonCardContent>
+                        {bills.length === 0 ? (
+                            <div className="text-center p-4 text-gray-500">
+                                No bills found. Add your first bill below.
+                            </div>
+                        ) : (
+                            // Group bills by category id
+                            (() => {
+                                const grouped: Record<string, Bill[]> = bills.reduce((acc, b) => {
+                                    const key = b.category_id || 'uncategorized';
+                                    if (!acc[key]) acc[key] = [];
+                                    acc[key].push(b);
+                                    return acc;
+                                }, {} as Record<string, Bill[]>);
+
+                                // Render categories in the order they appear in `categories`, then any uncategorized
+                                const rendered: React.ReactNode[] = [];
+
+                                categories.forEach((cat) => {
+                                    const group = grouped[cat.id];
+                                    if (group && group.length > 0) {
+                                        rendered.push(
+                                            <div key={cat.id} className="mb-4">
+                                                <h3 className="text-lg font-semibold mb-2">{cat.icon} {cat.name} ({group.length})</h3>
+                                                <IonList>
+                                                    {group.map((bill) => (
+                                                        <IonItem key={bill.id} className="mb-2">
+                                                            <IonLabel>
+                                                                <h2 className="font-semibold">{bill.name}</h2>
+                                                                <p className="text-sm text-gray-600">
+                                                                    Due: {new Date(bill.due_date).toLocaleDateString()} • {formatRecurrence(bill.recurrence)} • {getCurrencySymbol(bill.currency)} {bill.amount.toFixed(2)}
+                                                                </p>
+                                                                {bill.notes && (
+                                                                    <p className="text-sm text-gray-500 mt-1">{bill.notes}</p>
+                                                                )}
+                                                            </IonLabel>
+                                                            <IonButton
+                                                                fill="clear"
+                                                                slot="end"
+                                                                onClick={() => setEditingBill(bill)}
+                                                            >
+                                                                <IonIcon icon={create} color="primary" />
+                                                            </IonButton>
+                                                            <IonButton
+                                                                fill="clear"
+                                                                slot="end"
+                                                                onClick={() => handleDeleteBill(bill)}
+                                                            >
+                                                                <IonIcon icon={trash} color="danger" />
+                                                            </IonButton>
+                                                        </IonItem>
+                                                    ))}
+                                                </IonList>
+                                            </div>
+                                        );
+                                        // remove from grouped so we don't render again
+                                        delete grouped[cat.id];
+                                    }
+                                });
+
+                                // Any remaining groups are uncategorized or have unknown category ids
+                                const remainingKeys = Object.keys(grouped);
+                                if (remainingKeys.length > 0) {
+                                    const uncategorizedBills: Bill[] = remainingKeys.reduce((acc, key) => acc.concat(grouped[key]), [] as Bill[]);
+                                    rendered.push(
+                                        <div key="uncat" className="mb-4">
+                                            <h3 className="text-lg font-semibold mb-2">Uncategorized ({uncategorizedBills.length})</h3>
+                                            <IonList>
+                                                {uncategorizedBills.map((bill) => (
+                                                    <IonItem key={bill.id} className="mb-2">
+                                                        <IonLabel>
+                                                            <h2 className="font-semibold">{bill.name}</h2>
+                                                            <p className="text-sm text-gray-600">
+                                                                {getCategoryName(bill.category_id)} • Due: {new Date(bill.due_date).toLocaleDateString()} • {formatRecurrence(bill.recurrence)} • ${bill.amount.toFixed(2)}
+                                                            </p>
+                                                            {bill.notes && (
+                                                                <p className="text-sm text-gray-500 mt-1">{bill.notes}</p>
+                                                            )}
+                                                        </IonLabel>
+                                                        <IonButton
+                                                            fill="clear"
+                                                            slot="end"
+                                                            onClick={() => setEditingBill(bill)}
+                                                        >
+                                                            <IonIcon icon={create} color="primary" />
+                                                        </IonButton>
+                                                        <IonButton
+                                                            fill="clear"
+                                                            slot="end"
+                                                            onClick={() => handleDeleteBill(bill)}
+                                                        >
+                                                            <IonIcon icon={trash} color="danger" />
+                                                        </IonButton>
+                                                    </IonItem>
+                                                ))}
+                                            </IonList>
+                                        </div>
+                                    );
+                                }
+
+                                return <div>{rendered}</div>;
+                            })()
+                        )}
+                    </IonCardContent>
+                </IonCard>
 
                 <IonFab vertical="bottom" horizontal="end" slot="fixed">
                     <IonFabButton onClick={() => setShowAddModal(true)}>
