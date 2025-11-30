@@ -42,14 +42,27 @@ const ManageBills: React.FC = () => {
     const fetchData = useCallback(async () => {
         if (user) {
             try {
-                const [billsData, categoriesData, userData] = await Promise.all([
+                const storageKey = `userProfile_${user.id}`;
+                const stored = localStorage.getItem(storageKey);
+                if (stored) {
+                    try {
+                        setUserProfile(JSON.parse(stored));
+                    } catch (e) {
+                        console.error('Failed to parse stored user profile', e);
+                    }
+                } else {
+                    const userData = await userService.getUser(user.id);
+                    setUserProfile(userData);
+                    localStorage.setItem(storageKey, JSON.stringify(userData));
+                }
+
+                const [billsData, categoriesData] = await Promise.all([
                     billService.getBills(user.id),
-                    categoryService.getCategories(user.id),
-                    userService.getUser(user.id)
+                    categoryService.getCategories(user.id)
                 ]);
+
                 setBills(billsData);
                 setCategories(categoriesData);
-                setUserProfile(userData);
             } catch (error) {
                 console.error('Error fetching data:', error);
             }

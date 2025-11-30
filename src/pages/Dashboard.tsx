@@ -1,5 +1,7 @@
 import {
   IonBadge,
+  IonButton,
+  IonButtons,
   IonCard,
   IonContent,
   IonFab,
@@ -18,20 +20,24 @@ import {
   IonSegment,
   IonSegmentButton,
   IonTitle,
+  IonToggle,
   IonToolbar,
   RefresherEventDetail,
   useIonToast
 } from '@ionic/react';
-import { add, alertCircle, checkmarkCircle, ellipseOutline } from 'ionicons/icons';
+import { add, alertCircle } from 'ionicons/icons';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
 import AddBillForm from '../components/AddBillForm';
 import { useAuth } from '../context/AuthContext';
-import { Bill, BillWithPaymentStatus, Category } from '../models/types';
+import { Bill, BillWithPaymentStatus, Category, User } from '../models/types';
 import { billService } from '../services/billService';
 import { categoryService } from '../services/categoryService';
 import './Dashboard.css';
 
 import { reminderService } from '../services/reminderService';
+import { userService } from '../services/userService';
 import { getCurrencySymbol } from '../services/utilService';
 
 interface CategorizedBills {
@@ -46,9 +52,13 @@ const Dashboard: React.FC = () => {
   const { user } = useAuth();
   const [bills, setBills] = useState<BillWithPaymentStatus[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [userProfile, setUserProfile] = useState<User | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'thisMonth'>('overview');
   const [presentToast] = useIonToast();
+  const [calendarDate, setCalendarDate] = useState<Date | null>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [showBillModal, setShowBillModal] = useState(false);
   const hasFetchedRef = useRef(false);
 
   const fetchBills = useCallback(async () => {
@@ -73,6 +83,36 @@ const Dashboard: React.FC = () => {
       reminderService.requestPermissions();
     }
   }, [user, fetchBills]);
+
+  useEffect(() => {
+    if (user) {
+      const storageKey = `userProfile_${user.id}`;
+      const stored = localStorage.getItem(storageKey);
+      if (stored) {
+        try {
+          setUserProfile(JSON.parse(stored));
+        } catch (e) {
+          console.error('Failed to parse stored user profile', e);
+        }
+      } else {
+        userService.getUser(user.id).then((profile) => {
+          setUserProfile(profile);
+          localStorage.setItem(storageKey, JSON.stringify(profile));
+        }).catch(console.error);
+      }
+    }
+  }, [user]);
+
+  // Map of date string (YYYY-MM-DD) to bills due on that date
+  const billsByDate = React.useMemo(() => {
+    const map: Record<string, BillWithPaymentStatus[]> = {};
+    bills.forEach((bill: BillWithPaymentStatus) => {
+      const dateStr = bill.effective_due_date.split('T')[0]; // Use date string directly to avoid timezone issues
+      if (!map[dateStr]) map[dateStr] = [];
+      map[dateStr].push(bill);
+    });
+    return map;
+  }, [bills]);
 
   const handleRefresh = (event: CustomEvent<RefresherEventDetail>) => {
     fetchBills().then(() => {
@@ -216,17 +256,13 @@ const Dashboard: React.FC = () => {
 
   const renderBillItem = (bill: BillWithPaymentStatus) => (
     <IonItem key={bill.id} lines='none'>
-      <div
+      <IonToggle
         slot="start"
-        className="cursor-pointer"
-        onClick={() => togglePaid(bill)}
-      >
-        <IonIcon
-          icon={bill.is_current_month_paid ? checkmarkCircle : ellipseOutline}
-          color={bill.is_current_month_paid ? 'success' : 'medium'}
-          size="large"
-        />
-      </div>
+        enableOnOffLabels={true}
+        checked={bill.is_current_month_paid}
+        onIonChange={() => togglePaid(bill)}
+        className='mr-4'
+      />
       <IonLabel className={bill.is_current_month_paid ? 'opacity-50 line-through' : ''}>
         <h2 className="flex items-center gap-2">
           {bill.name}
@@ -247,15 +283,104 @@ const Dashboard: React.FC = () => {
 
   return (
     <IonPage>
-      {/* <IonHeader>
+      <IonHeader>
         <IonToolbar>
-          <IonTitle>MonthWise</IonTitle>
+          <IonTitle>Hi, {userProfile?.name || 'User'}</IonTitle>
         </IonToolbar>
-      </IonHeader> */}
+      </IonHeader>
       <IonContent fullscreen className="ion-padding">
         <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
           <IonRefresherContent />
         </IonRefresher>
+
+        {/* Calendar Overview */}
+        <div className="dashboard-calendar-container mb-6">
+          <Calendar
+            className="border rounded-lg shadow-md"
+            value={calendarDate}
+            onChange={
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (value: any) => setCalendarDate((Array.isArray(value) ? value[0] : value) as Date | null)
+            }
+            tileContent={({ date }: { date: Date }) => {
+              const dateStr = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
+              const bills: BillWithPaymentStatus[] = billsByDate[dateStr] || [];
+              return (
+                <div className="calendar-icons" style={{ minHeight: 18, paddingTop: 2 }}>
+                  {bills.map((bill: BillWithPaymentStatus, idx: number) => (
+                    <span key={bill.id} style={{ marginLeft: idx > 0 ? 2 : 0, paddingRight: 6, fontSize: 12, zIndex: 10 - idx, position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+                      {getCategoryName(bill.category_id).split(' ')[0]}
+                      <small style={{ fontSize: 8, marginLeft: 1, fontWeight: 'bold' }}>
+                        {bill.is_current_month_paid ? 'P' : 'U'}
+                      </small>
+                    </span>
+                  ))}
+                </div>
+              );
+            }}
+            tileClassName={({ date }: { date: Date }) => {
+              const dateStr = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
+              const bills: BillWithPaymentStatus[] = billsByDate[dateStr] || [];
+              if (bills.length === 0) return '';
+
+              const now = new Date();
+              let hasOverdue = false;
+              let hasDueSoonUnpaid = false;
+              let allPaid = true;
+              let hasUnpaidAfter3Days = false;
+
+              bills.forEach((bill) => {
+                if (bill.is_overdue) hasOverdue = true;
+                if (!bill.is_current_month_paid) {
+                  allPaid = false;
+                  // Check if due in next 3 days (including today)
+                  const dueDate = new Date(bill.effective_due_date);
+                  const diffDays = Math.ceil((dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+                  if (diffDays >= 0 && diffDays <= 2) hasDueSoonUnpaid = true;
+                  if (diffDays > 2) hasUnpaidAfter3Days = true;
+                }
+              });
+
+              if (hasOverdue) return 'calendar-tile-overdue';
+              if (hasDueSoonUnpaid) return 'calendar-tile-due-soon';
+              if (allPaid) return 'calendar-tile-all-paid';
+              if (hasUnpaidAfter3Days) return 'calendar-tile-unpaid-later';
+              return '';
+            }}
+            onClickDay={(date) => { setSelectedDate(date); setShowBillModal(true); }}
+          />
+        </div>
+
+        {/* Bill Details Modal */}
+        <IonModal isOpen={showBillModal} onDidDismiss={() => setShowBillModal(false)}>
+          <IonHeader>
+            <IonToolbar>
+              <IonTitle>
+                Bills for {selectedDate ? selectedDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : ''}
+              </IonTitle>
+              <IonButtons slot="end">
+                <IonButton onClick={() => setShowBillModal(false)}>Close</IonButton>
+              </IonButtons>
+            </IonToolbar>
+          </IonHeader>
+          <IonContent>
+            {selectedDate && (
+              <IonList>
+                {(() => {
+                  const dateStr = selectedDate.getFullYear() + '-' + String(selectedDate.getMonth() + 1).padStart(2, '0') + '-' + String(selectedDate.getDate()).padStart(2, '0');
+                  const billsForDate = billsByDate[dateStr] || [];
+                  return billsForDate.length > 0 ? (
+                    billsForDate.map(renderBillItem)
+                  ) : (
+                    <IonItem>
+                      <IonLabel>No bills due on this date.</IonLabel>
+                    </IonItem>
+                  );
+                })()}
+              </IonList>
+            )}
+          </IonContent>
+        </IonModal>
 
         {/* Tabs */}
         <IonSegment
@@ -363,17 +488,11 @@ const Dashboard: React.FC = () => {
                     .sort((a, b) => new Date(a.effective_due_date).getTime() - new Date(b.effective_due_date).getTime())
                     .map(bill => (
                       <IonItem key={bill.id}>
-                        <div
+                        <IonToggle
                           slot="start"
-                          className="cursor-pointer"
-                          onClick={() => togglePaid(bill)}
-                        >
-                          <IonIcon
-                            icon={bill.is_current_month_paid ? checkmarkCircle : ellipseOutline}
-                            color={bill.is_current_month_paid ? 'success' : 'medium'}
-                            size="large"
-                          />
-                        </div>
+                          checked={bill.is_current_month_paid}
+                          onIonChange={() => togglePaid(bill)}
+                        />
                         <IonLabel className={bill.is_current_month_paid ? 'line-through opacity-60' : ''}>
                           <h2>{bill.name}</h2>
                           <p>{getCategoryName(bill.category_id)} • {formatDueDate(bill)}</p>

@@ -88,6 +88,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const signOut = async () => {
         await supabase.auth.signOut();
+        // Clear stored user profiles
+        Object.keys(localStorage).forEach(key => {
+            if (key.startsWith('userProfile_')) {
+                localStorage.removeItem(key);
+            }
+        });
     };
 
     const value = {

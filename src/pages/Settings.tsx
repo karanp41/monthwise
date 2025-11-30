@@ -29,10 +29,23 @@ const Settings: React.FC = () => {
 
   useEffect(() => {
     if (user) {
-      userService.getUser(user.id).then((data) => {
-        setUserProfile(data);
-        setSelectedCurrency(data?.default_currency || 'USD');
-      }).catch(console.error);
+      const storageKey = `userProfile_${user.id}`;
+      const stored = localStorage.getItem(storageKey);
+      if (stored) {
+        try {
+          const profile = JSON.parse(stored);
+          setUserProfile(profile);
+          setSelectedCurrency(profile?.default_currency || 'USD');
+        } catch (e) {
+          console.error('Failed to parse stored user profile', e);
+        }
+      } else {
+        userService.getUser(user.id).then((data) => {
+          setUserProfile(data);
+          setSelectedCurrency(data?.default_currency || 'USD');
+          localStorage.setItem(storageKey, JSON.stringify(data));
+        }).catch(console.error);
+      }
     }
   }, [user]);
 
@@ -48,6 +61,7 @@ const Settings: React.FC = () => {
       const updated = await userService.updateUser(user.id, { default_currency: val });
       setUserProfile(updated);
       setSelectedCurrency(val);
+      localStorage.setItem(`userProfile_${user.id}`, JSON.stringify(updated));
       presentToast({ message: 'Default currency updated', duration: 2000, color: 'success' });
     } catch (err) {
       console.error(err);
