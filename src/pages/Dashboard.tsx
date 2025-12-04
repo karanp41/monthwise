@@ -163,27 +163,28 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const togglePaid = async (bill: BillWithPaymentStatus) => {
+  const togglePaid = async (bill: BillWithPaymentStatus, monthToToggle?: 'current' | 'effective') => {
     if (!user) return;
 
-    try {
-      if (bill.is_current_month_paid) {
-        // Find and delete the payment for the effective due date month
-        const paymentMonth = new Date(bill.effective_due_date).toISOString().split('T')[0].substring(0, 7) + '-01';
-        const payments = await billService.getPaymentHistory(bill.id);
-        const currentPayment = payments.find(p => p.payment_month === paymentMonth);
+    const currentDate = new Date();
+    const paymentMonth = monthToToggle === 'current'
+      ? new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).toISOString().split('T')[0]
+      : new Date(bill.effective_due_date).toISOString().split('T')[0].substring(0, 7) + '-01';
 
-        if (currentPayment) {
-          await billService.deletePayment(currentPayment.id);
-          presentToast({
-            message: 'Payment unmarked',
-            duration: 2000,
-            color: 'warning',
-          });
-        }
+    try {
+      const payments = await billService.getPaymentHistory(bill.id);
+      const existingPayment = payments.find(p => p.payment_month === paymentMonth);
+
+      if (existingPayment) {
+        // Delete the payment
+        await billService.deletePayment(existingPayment.id);
+        presentToast({
+          message: 'Payment unmarked',
+          duration: 2000,
+          color: 'warning',
+        });
       } else {
-        // Record payment for the effective due date month
-        const paymentMonth = new Date(bill.effective_due_date).toISOString().split('T')[0].substring(0, 7) + '-01';
+        // Record payment
         await billService.recordPayment(bill.id, user.id, bill.amount, paymentMonth);
         presentToast({
           message: 'Payment recorded!',
@@ -264,7 +265,7 @@ const Dashboard: React.FC = () => {
       // Show bills that are due this month OR were paid this month
       const billDate = new Date(bill.effective_due_date);
       const isDueThisMonth = billDate.getMonth() === currentMonth && billDate.getFullYear() === currentYear;
-      const wasPaidThisMonth = bill.is_current_month_paid;
+      const wasPaidThisMonth = bill.current_month_paid;
 
       return isDueThisMonth || wasPaidThisMonth;
     });
@@ -276,7 +277,7 @@ const Dashboard: React.FC = () => {
         slot="start"
         enableOnOffLabels={true}
         checked={bill.is_current_month_paid}
-        onIonChange={() => togglePaid(bill)}
+        onIonChange={() => togglePaid(bill, 'effective')}
         className='mr-4'
       />
       <IonLabel className={bill.is_current_month_paid ? 'opacity-50 line-through' : ''}>
@@ -337,9 +338,9 @@ const Dashboard: React.FC = () => {
                   {bills.map((bill: BillWithPaymentStatus, idx: number) => (
                     <span key={bill.id} style={{ marginLeft: idx > 0 ? 2 : 0, paddingRight: 6, fontSize: 12, zIndex: 10 - idx, position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
                       {getCategoryName(bill.category_id).split(' ')[0]}
-                      <small style={{ fontSize: 8, marginLeft: 1, fontWeight: 'bold' }}>
+                      {/* <small style={{ fontSize: 8, marginLeft: 1, fontWeight: 'bold' }}>
                         {bill.is_current_month_paid ? 'P' : 'U'}
-                      </small>
+                      </small> */}
                     </span>
                   ))}
                 </div>
@@ -534,14 +535,18 @@ const Dashboard: React.FC = () => {
                       <IonItem key={bill.id}>
                         <IonToggle
                           slot="start"
-                          checked={bill.is_current_month_paid}
-                          onIonChange={() => togglePaid(bill)}
+                          enableOnOffLabels={true}
+                          checked={bill.current_month_paid}
+                          onIonChange={() => togglePaid(bill, 'current')}
+                          className='mr-4'
                         />
-                        <IonLabel className={bill.is_current_month_paid ? 'line-through opacity-60' : ''}>
-                          <h2>{bill.name}</h2>
-                          <p>{getCategoryName(bill.category_id)} • {formatDueDate(bill)}</p>
+                        <IonLabel >
+                          <h2 className={bill.current_month_paid ? 'line-through opacity-60' : ''}>{bill.name}</h2>
+                          <p className={bill.current_month_paid ? 'line-through opacity-60' : ''}>{getCategoryName(bill.category_id)} • {formatDueDate(bill)}</p>
+
+                          {bill.current_month_paid ? <p>Next Due on <span className='font-bold'>{formatDueDate(bill)}</span></p> : null}
                         </IonLabel>
-                        <IonNote slot="end" className='text-md' color={bill.is_current_month_paid ? 'success' : 'dark'}>
+                        <IonNote slot="end" className='text-md' color={bill.current_month_paid ? 'success' : 'dark'}>
                           {getCurrencySymbol(bill.currency)}{bill.amount.toFixed(2)}
                         </IonNote>
                       </IonItem>

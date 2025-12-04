@@ -58,4 +58,5 @@ export interface BillWithPaymentStatus extends Bill {
     effective_due_date: string; // The actual due date to display (current or next month)
     is_overdue: boolean;
     days_until_due: number;
+    current_month_paid: boolean; // Whether this bill was paid in the current month
 }

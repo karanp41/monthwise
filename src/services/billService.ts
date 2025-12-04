@@ -169,6 +169,14 @@ export const billService = {
                 isCurrentMonthPaid = bill.paid_date !== null;
             }
 
+            // Check if bill was paid in the current month (for "This Month's Bills" tab)
+            const currentMonthPaid = billPayments.some(
+                p => {
+                    const pd = new Date(p.payment_month);
+                    return p.bill_id === bill.id && pd.getFullYear() === currentDate.getFullYear() && pd.getMonth() === currentDate.getMonth();
+                }
+            );
+
             // Calculate days until due
             const timeDiff = effectiveDueDate.getTime() - currentDate.getTime();
             const daysUntilDue = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
@@ -183,6 +191,7 @@ export const billService = {
                 effective_due_date: effectiveDueDate.toISOString(),
                 is_overdue: isOverdue,
                 days_until_due: daysUntilDue,
+                current_month_paid: currentMonthPaid,
             };
         });
     },
