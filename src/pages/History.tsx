@@ -17,7 +17,7 @@ import { useAuth } from '../context/AuthContext';
 import { BillPayment, Category } from '../models/types';
 import { billService } from '../services/billService';
 import { categoryService } from '../services/categoryService';
-import { getCurrencySymbol } from '../services/utilService';
+import { getCategoryName, getCurrencySymbol } from '../services/utilService';
 import './History.css';
 
 interface PaymentWithBill extends BillPayment {
@@ -54,10 +54,7 @@ const HistoryPage: React.FC = () => {
     fetchHistory();
   }, [user]);
 
-  const getCategoryName = (categoryId: string) => {
-    const category = categories.find(c => c.id === categoryId);
-    return category ? `${category.icon} ${category.name}` : 'Unknown';
-  };
+
 
   const getBillName = (payment: PaymentWithBill) => {
     return payment.bills?.name || 'Unknown Bill';
@@ -103,7 +100,7 @@ const HistoryPage: React.FC = () => {
                 <IonLabel>
                   <h2>{getBillName(payment)}</h2>
                   <p>
-                    {getCategoryName(getCategoryId(payment))} •
+                    {getCategoryName(getCategoryId(payment), categories)} •
                     Paid on {new Date(payment.payment_date).toLocaleDateString()} •
                     {payment.payment_month}
                   </p>

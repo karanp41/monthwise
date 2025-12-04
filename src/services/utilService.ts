@@ -163,3 +163,8 @@ export const getCurrencySymbol = (currency: string) => {
     const symbols: { [key: string]: string } = allCurrencies;
     return symbols[currency] || currency;
 };
+
+export const getCategoryName = (categoryId: string, categories: { id: string; icon: string; name: string }[]) => {
+    const category = categories.find(c => c.id === categoryId);
+    return category ? `${category.icon} ${category.name}` : 'Unknown';
+};

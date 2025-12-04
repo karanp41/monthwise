@@ -51,6 +51,18 @@ import './theme/variables.css';
 
 setupIonicReact();
 
+// Sync Tailwind dark mode with Ionic dark mode
+const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+const updateDarkMode = () => {
+  if (prefersDark.matches) {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+  }
+};
+updateDarkMode();
+prefersDark.addEventListener('change', updateDarkMode);
+
 const ProtectedRoutes: React.FC = () => {
   const { user, loading } = useAuth();
 

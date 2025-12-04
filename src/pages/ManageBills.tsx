@@ -28,7 +28,7 @@ import { Bill, Category, User } from '../models/types';
 import { billService } from '../services/billService';
 import { categoryService } from '../services/categoryService';
 import { userService } from '../services/userService';
-import { getCurrencySymbol } from '../services/utilService';
+import { getCategoryName, getCurrencySymbol } from '../services/utilService';
 
 const ManageBills: React.FC = () => {
     const { user } = useAuth();
@@ -159,11 +159,6 @@ const ManageBills: React.FC = () => {
                 },
             ],
         });
-    };
-
-    const getCategoryName = (categoryId: string) => {
-        const category = categories.find(c => c.id === categoryId);
-        return category ? `${category.icon} ${category.name}` : 'Unknown';
     };
 
     const formatRecurrence = (recurrence: string) => {
@@ -301,7 +296,7 @@ const ManageBills: React.FC = () => {
                                                         <IonLabel>
                                                             <h2 className="font-semibold">{bill.name}</h2>
                                                             <p className="text-sm text-gray-600">
-                                                                {getCategoryName(bill.category_id)} • Due: {new Date(bill.due_date).toLocaleDateString()} • {formatRecurrence(bill.recurrence)} • ${bill.amount.toFixed(2)}
+                                                                {getCategoryName(bill.category_id, categories)} • Due: {new Date(bill.due_date).toLocaleDateString()} • {formatRecurrence(bill.recurrence)} • ${bill.amount.toFixed(2)}
                                                             </p>
                                                             {bill.notes && (
                                                                 <p className="text-sm text-gray-500 mt-1">{bill.notes}</p>

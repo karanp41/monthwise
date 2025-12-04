@@ -39,7 +39,7 @@ import './Dashboard.css';
 
 import { reminderService } from '../services/reminderService';
 import { userService } from '../services/userService';
-import { getCurrencySymbol } from '../services/utilService';
+import { getCategoryName, getCurrencySymbol } from '../services/utilService';
 
 interface CategorizedBills {
   overdue: BillWithPaymentStatus[];
@@ -234,11 +234,6 @@ const Dashboard: React.FC = () => {
   // const totalPending = bills.filter(b => !b.is_current_month_paid).reduce((sum, bill) => sum + bill.amount, 0);
   // const totalPaid = bills.filter(b => b.is_current_month_paid).reduce((sum, bill) => sum + bill.amount, 0);
 
-  const getCategoryName = (categoryId: string) => {
-    const category = categories.find(c => c.id === categoryId);
-    return category ? `${category.icon} ${category.name}` : 'Unknown';
-  };
-
   const formatDueDate = (bill: BillWithPaymentStatus) => {
     const date = new Date(bill.effective_due_date);
     const monthName = date.toLocaleDateString('en-US', { month: 'short' });
@@ -290,7 +285,7 @@ const Dashboard: React.FC = () => {
             </IonBadge>
           )}
         </h2>
-        <p>{getCategoryName(bill.category_id)} • {formatDueDate(bill)}</p>
+        <p>{getCategoryName(bill.category_id, categories)} • {formatDueDate(bill)}</p>
       </IonLabel>
       <IonNote slot="end" color={bill.is_current_month_paid ? 'success' : bill.is_overdue ? 'danger' : 'dark'}>
         {getCurrencySymbol(bill.currency)}{bill.amount.toFixed(2)}
@@ -337,7 +332,7 @@ const Dashboard: React.FC = () => {
                 <div className="calendar-icons" style={{ minHeight: 18, paddingTop: 2 }}>
                   {bills.map((bill: BillWithPaymentStatus, idx: number) => (
                     <span key={bill.id} style={{ marginLeft: idx > 0 ? 2 : 0, paddingRight: 6, fontSize: 12, zIndex: 10 - idx, position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
-                      {getCategoryName(bill.category_id).split(' ')[0]}
+                      {getCategoryName(bill.category_id, categories).split(' ')[0]}
                       {/* <small style={{ fontSize: 8, marginLeft: 1, fontWeight: 'bold' }}>
                         {bill.is_current_month_paid ? 'P' : 'U'}
                       </small> */}
@@ -542,7 +537,7 @@ const Dashboard: React.FC = () => {
                         />
                         <IonLabel >
                           <h2 className={bill.current_month_paid ? 'line-through opacity-60' : ''}>{bill.name}</h2>
-                          <p className={bill.current_month_paid ? 'line-through opacity-60' : ''}>{getCategoryName(bill.category_id)} • {formatDueDate(bill)}</p>
+                          <p className={bill.current_month_paid ? 'line-through opacity-60' : ''}>{getCategoryName(bill.category_id, categories)} • {formatDueDate(bill)}</p>
 
                           {bill.current_month_paid ? <p>Next Due on <span className='font-bold'>{formatDueDate(bill)}</span></p> : null}
                         </IonLabel>
