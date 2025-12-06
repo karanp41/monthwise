@@ -1,2 +1,75 @@
 /* For information on how to create your own theme, please refer to:
 http://ionicframework.com/docs/theming/ */
+
+:root {
+  /* Custom Primary Color - Purple Gradient */
+  --primary-gradient: linear-gradient(to right, rgb(87, 46, 255) 0%, rgb(54, 76, 160) 50%, rgb(87, 46, 255) 100%);
+  
+  /* Custom Button/Accent Gradient */
+  --accent-gradient: linear-gradient(to right, rgb(108, 195, 244) 0%, rgb(128, 171, 233) 17%, rgb(178, 109, 205) 53%, rgb(250, 21, 166, 0.7) 100%);
+  --accent-gradient-transparent: linear-gradient(
+    to right, 
+    rgba(108, 195, 244, 0.2) 0%, 
+    rgba(128, 171, 233, 0.1) 17%, 
+    rgba(178, 109, 205, 0.1) 53%, 
+    rgba(250, 21, 166, 0.1) 100%
+  );
+  
+  /* Primary color values from gradient */
+  --primary-color: rgb(87, 46, 255);
+  --primary-color-rgb: 87, 46, 255;
+  
+  /* Override Ionic primary color */
+  --ion-color-primary: #572eff;
+  --ion-color-primary-rgb: 87, 46, 255;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: rgb(76, 40, 224);
+  --ion-color-primary-tint: rgb(108, 75, 255);
+
+  --ion-color-warning: #ffd500e2;
+  --ion-color-warning-rgb: 255, 149, 0;
+  --ion-color-warning-contrast: #000;
+  --ion-color-warning-contrast-rgb: 255, 255, 255;
+  --ion-color-warning-shade: #e08500;
+  --ion-color-warning-tint: #ffab32; 
+}
+
+.dark {
+  /* Keep same colors in dark mode */
+  --ion-color-primary: rgb(87, 46, 255);
+  --ion-color-primary-rgb: 87, 46, 255;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: rgb(76, 40, 224);
+  --ion-color-primary-tint: rgb(108, 75, 255);
+}
+
+/* Apply gradient to buttons */
+ion-button:not([fill="clear"]):not([fill="outline"]) {
+  --background: var(--accent-gradient);
+  --background-activated: var(--accent-gradient);
+  --background-focused: var(--accent-gradient);
+  --background-hover: var(--accent-gradient);
+  font-weight: 600;
+}
+
+ion-fab-button {
+  --background: var(--accent-gradient);
+  --background-activated: var(--accent-gradient);
+  --background-focused: var(--accent-gradient);
+  --background-hover: var(--accent-gradient);
+}
+
+/* Segment button active state with gradient */
+ion-segment-button.segment-button-checked {
+  --indicator-color: transparent;
+  background: var(--accent-gradient);
+  color: white;
+  border-radius: 8px;
+}
+
+/* Tab bar active icon with primary color */
+ion-tab-button.tab-selected {
+  --color-selected: var(--primary-color);
+}

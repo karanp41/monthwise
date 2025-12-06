@@ -158,41 +158,41 @@
 }
 
 .react-calendar__tile--hasActive {
-  background: #76baff;
+  background: rgb(178, 109, 205);
 }
 
 .dark .react-calendar__tile--hasActive {
-  background: #3b82f6; /* blue-500 */
+  background: rgb(178, 109, 205);
 }
 
 .react-calendar__tile--hasActive:enabled:hover,
 .react-calendar__tile--hasActive:enabled:focus {
-  background: #a9d4ff;
+  background: rgb(200, 130, 220);
 }
 
 .dark .react-calendar__tile--hasActive:enabled:hover,
 .dark .react-calendar__tile--hasActive:enabled:focus {
-  background: #2563eb; /* blue-600 */
+  background: rgb(160, 90, 190);
 }
 
 .react-calendar__tile--active {
-  background: #006edc;
+  background: rgb(87, 46, 255);
   color: white;
 }
 
 .dark .react-calendar__tile--active {
-  background: #1d4ed8; /* blue-700 */
+  background: rgb(87, 46, 255);
   color: white;
 }
 
 .react-calendar__tile--active:enabled:hover,
 .react-calendar__tile--active:enabled:focus {
-  background: #1087ff;
+  background: rgb(108, 75, 255);
 }
 
 .dark .react-calendar__tile--active:enabled:hover,
 .dark .react-calendar__tile--active:enabled:focus {
-  background: #1e40af; /* blue-800 */
+  background: rgb(76, 40, 224);
 }
 
 .react-calendar--selectRange .react-calendar__tile--hover {
@@ -235,13 +235,13 @@
 }
 
 .calendar-tile-unpaid-later {
-  background-color: #dbeafe !important; /* light blue */
-  color: #1e40af !important; /* dark blue text */
+  background-color: #e9d5f5 !important; /* light purple */
+  color: #572eff !important; /* primary purple text */
 }
 
 .dark .calendar-tile-unpaid-later {
-  background-color: #1e3a8a !important; /* dark blue-900 */
-  color: #93c5fd !important; /* light blue text */
+  background-color: #4a2989 !important; /* dark purple-900 */
+  color: #c9a8ff !important; /* light purple text */
 }
 
 .calendar-icons {
@@ -256,7 +256,7 @@
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background-color: #007bff;
+  background: linear-gradient(135deg, rgb(108, 195, 244) 0%, rgb(178, 109, 205) 50%, rgb(250, 21, 166) 100%);
   color: white;
   text-align: center;
   line-height: 16px;
@@ -265,7 +265,6 @@
 }
 
 .dark .calendar-icons span {
-  background-color: #3b82f6; /* blue-500 */
+  background: linear-gradient(135deg, rgb(108, 195, 244) 0%, rgb(178, 109, 205) 50%, rgb(250, 21, 166) 100%);
   color: #f9fafb; /* gray-50 */
 }
-

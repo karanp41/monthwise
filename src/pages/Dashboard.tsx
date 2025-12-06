@@ -26,7 +26,7 @@ import {
   RefresherEventDetail,
   useIonToast
 } from '@ionic/react';
-import { add, alertCircle } from 'ionicons/icons';
+import { add, alertCircle, bulbSharp } from 'ionicons/icons';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
@@ -37,6 +37,7 @@ import { billService } from '../services/billService';
 import { categoryService } from '../services/categoryService';
 import './Dashboard.css';
 
+import { BottomSpacer } from '../components/BottomSpacer';
 import { reminderService } from '../services/reminderService';
 import { userService } from '../services/userService';
 import { getCategoryName, getCurrencySymbol } from '../services/utilService';
@@ -317,6 +318,9 @@ const Dashboard: React.FC = () => {
         </IonRefresher>
 
         {/* Calendar Overview */}
+        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <IonIcon icon={bulbSharp} />
+          Smart Bill Calendar</h2>
         <div className="dashboard-calendar-container mb-6">
           <Calendar
             className="border rounded-lg shadow-md bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
@@ -382,7 +386,7 @@ const Dashboard: React.FC = () => {
                 Bills for {selectedDate ? selectedDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : ''}
               </IonTitle>
               <IonButtons slot="end">
-                <IonButton onClick={() => setShowBillModal(false)}>Close</IonButton>
+                <IonButton onClick={() => setShowBillModal(false)} color={'danger'}>Close</IonButton>
               </IonButtons>
             </IonToolbar>
           </IonHeader>
@@ -455,7 +459,10 @@ const Dashboard: React.FC = () => {
                 {categorizedBills.overdue.length > 0 && (
                   <IonList inset={true} className="shadow-md !rounded-2xl !m-0 !mb-4 pt-0">
                     <IonListHeader color="danger" className="font-semibold">
-                      ⚠️ Overdue ({categorizedBills.overdue.length})
+                      <div className='flex justify-between w-full pr-4'>
+                        <span>⚠️ Overdue</span>
+                        <span>{categorizedBills.overdue.length} {categorizedBills.overdue.length > 1 ? 'Bills' : 'Bill'}</span>
+                      </div>
                     </IonListHeader>
                     {categorizedBills.overdue.map(renderBillItem)}
                   </IonList>
@@ -465,7 +472,10 @@ const Dashboard: React.FC = () => {
                 {categorizedBills.dueToday.length > 0 && (
                   <IonList inset={true} className="shadow-md !rounded-2xl !m-0 !mb-4 pt-0">
                     <IonListHeader color="warning" className="font-semibold">
-                      🔴 Due Today ({categorizedBills.dueToday.length})
+                      <div className='flex justify-between w-full pr-4'>
+                        <span>🔴 Due Today</span>
+                        <span>{categorizedBills.dueToday.length} {categorizedBills.dueToday.length > 1 ? 'Bills' : 'Bill'}</span>
+                      </div>
                     </IonListHeader>
                     {categorizedBills.dueToday.map(renderBillItem)}
                   </IonList>
@@ -475,7 +485,10 @@ const Dashboard: React.FC = () => {
                 {categorizedBills.dueTomorrow.length > 0 && (
                   <IonList inset={true} className="shadow-md !rounded-2xl !m-0 !mb-4 pt-0">
                     <IonListHeader color="primary" className="font-semibold">
-                      🟠 Due Tomorrow ({categorizedBills.dueTomorrow.length})
+                      <div className='flex justify-between w-full pr-4'>
+                        <span>🟠 Due Tomorrow</span>
+                        <span>{categorizedBills.dueTomorrow.length} {categorizedBills.dueTomorrow.length > 1 ? 'Bills' : 'Bill'}</span>
+                      </div>
                     </IonListHeader>
                     {categorizedBills.dueTomorrow.map(renderBillItem)}
                   </IonList>
@@ -485,7 +498,10 @@ const Dashboard: React.FC = () => {
                 {categorizedBills.dueWithin7Days.length > 0 && (
                   <IonList inset={true} className="shadow-md !rounded-2xl !m-0 !mb-4 pt-0">
                     <IonListHeader className="font-semibold">
-                      🟡 Due Within 7 Days ({categorizedBills.dueWithin7Days.length})
+                      <div className='flex justify-between w-full pr-4'>
+                        <span>🟡 Due Within 7 Days</span>
+                        <span>{categorizedBills.dueWithin7Days.length} {categorizedBills.dueWithin7Days.length > 1 ? 'Bills' : 'Bill'}</span>
+                      </div>
                     </IonListHeader>
                     {categorizedBills.dueWithin7Days.map(renderBillItem)}
                   </IonList>
@@ -495,7 +511,10 @@ const Dashboard: React.FC = () => {
                 {categorizedBills.dueNext15Days.length > 0 && (
                   <IonList inset={true} className="shadow-md !rounded-2xl !m-0 !mb-4 pt-0">
                     <IonListHeader className="font-semibold">
-                      🟢 Due Next 15 Days ({categorizedBills.dueNext15Days.length})
+                      <div className='flex justify-between w-full pr-4'>
+                        <span>🟢 Due Next 15 Days</span>
+                        <span>{categorizedBills.dueNext15Days.length} {categorizedBills.dueNext15Days.length > 1 ? 'Bills' : 'Bill'}</span>
+                      </div>
                     </IonListHeader>
                     {categorizedBills.dueNext15Days.map(renderBillItem)}
                   </IonList>
@@ -552,7 +571,9 @@ const Dashboard: React.FC = () => {
           </>
         )}
 
-        <IonFab vertical="bottom" horizontal="end" slot="fixed">
+        <BottomSpacer />
+
+        <IonFab vertical="bottom" horizontal="end" slot="fixed" style={{ bottom: '100px' }}>
           <IonFabButton onClick={() => setShowAddModal(true)}>
             <IonIcon icon={add} />
           </IonFabButton>

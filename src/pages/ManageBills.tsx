@@ -329,7 +329,7 @@ const ManageBills: React.FC = () => {
                     </IonCardContent>
                 </IonCard>
 
-                <IonFab vertical="bottom" horizontal="end" slot="fixed">
+                <IonFab vertical="bottom" horizontal="end" slot="fixed" style={{ bottom: '100px' }}>
                     <IonFabButton onClick={() => setShowAddModal(true)}>
                         <IonIcon icon={add} />
                     </IonFabButton>

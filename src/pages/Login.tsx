@@ -3,7 +3,6 @@ import {
     IonCard,
     IonCardContent,
     IonCardHeader,
-    IonCardTitle,
     IonContent,
     IonInput,
     IonItem,
@@ -14,6 +13,7 @@ import {
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import './Login.css';
 
 const Login: React.FC = () => {
     const [email, setEmail] = useState('');
@@ -47,10 +47,15 @@ const Login: React.FC = () => {
             <IonContent className="ion-padding">
                 <div className="flex items-center justify-center min-h-full">
                     <IonCard className="w-full max-w-md">
-                        <IonCardHeader>
-                            <IonCardTitle className="text-center text-2xl">
+                        <IonCardHeader className="text-center">
+                            <img
+                                src="/monthwise-logo.png"
+                                alt="MonthWise Logo"
+                                className="mx-auto mb-4 h-16 w-auto"
+                            />
+                            {/* <IonCardTitle className="text-center text-2xl">
                                 Welcome to MonthWise
-                            </IonCardTitle>
+                            </IonCardTitle> */}
                         </IonCardHeader>
                         <IonCardContent>
                             <form onSubmit={handleLogin}>

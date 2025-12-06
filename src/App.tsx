@@ -97,20 +97,20 @@ const ProtectedRoutes: React.FC = () => {
           <Redirect to="/dashboard" />
         </Route>
       </IonRouterOutlet>
-      <IonTabBar slot="bottom">
-        <IonTabButton tab="dashboard" href="/dashboard">
+      <IonTabBar slot="bottom" className="fixed bottom-4 left-4 right-4 bg-white/60 dark:bg-gray-800/80 backdrop-blur-sm shadow-lg rounded-3xl px-4 py-2 border border-gray-200 dark:border-gray-700">
+        <IonTabButton tab="dashboard" href="/dashboard" className="bg-transparent">
           <IonIcon aria-hidden="true" icon={home} />
           <IonLabel>Home</IonLabel>
         </IonTabButton>
-        <IonTabButton tab="manage-bills" href="/manage-bills">
+        <IonTabButton tab="manage-bills" href="/manage-bills" className="bg-transparent">
           <IonIcon aria-hidden="true" icon={receiptOutline} />
           <IonLabel>Bills</IonLabel>
         </IonTabButton>
-        <IonTabButton tab="history" href="/history">
+        <IonTabButton tab="history" href="/history" className="bg-transparent">
           <IonIcon aria-hidden="true" icon={timeOutline} />
           <IonLabel>History</IonLabel>
         </IonTabButton>
-        <IonTabButton tab="settings" href="/settings">
+        <IonTabButton tab="settings" href="/settings" className="bg-transparent">
           <IonIcon aria-hidden="true" icon={settingsOutline} />
           <IonLabel>Settings</IonLabel>
         </IonTabButton>
