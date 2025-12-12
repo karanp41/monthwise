@@ -9,8 +9,9 @@ import {
   IonTabs,
   setupIonicReact
 } from '@ionic/react';
+import { IonReactRouter } from '@ionic/react-router';
 import { home, receiptOutline, settingsOutline, timeOutline } from 'ionicons/icons';
-import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom';
+import { Redirect, Route } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Dashboard from './pages/Dashboard';
 import HistoryPage from './pages/History';
@@ -124,8 +125,8 @@ const App: React.FC = () => (
   <>
     <IonApp>
       <AuthProvider>
-        <BrowserRouter>
-          <Switch>
+        <IonReactRouter>
+          <IonRouterOutlet>
             {/* First-time onboarding, only when not logged in and not completed */}
             <Route exact path="/onboarding">
               <Onboarding />
@@ -151,8 +152,8 @@ const App: React.FC = () => (
               />
               <ProtectedRoutes />
             </Route>
-          </Switch>
-        </BrowserRouter>
+          </IonRouterOutlet>
+        </IonReactRouter>
       </AuthProvider>
     </IonApp>
   </>
