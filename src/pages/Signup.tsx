@@ -50,7 +50,12 @@ const Signup: React.FC = () => {
     return (
         <IonPage>
             <IonContent className="ion-padding">
-                <div className="flex items-center justify-center min-h-full">
+                <div className="flex flex-col  items-center justify-center min-h-full">
+                    <img
+                        src="/monthwise-logo-tagline.png"
+                        alt="MonthWise Logo"
+                        className="mx-auto h-128 w-auto"
+                    />
                     <IonCard className="w-full max-w-md">
                         <IonCardHeader>
                             <IonCardTitle className="text-center text-2xl">
