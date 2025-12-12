@@ -20,13 +20,14 @@ import {
   IonSegment,
   IonSegmentButton,
   IonSkeletonText,
+  IonSpinner,
   IonTitle,
   IonToggle,
   IonToolbar,
   RefresherEventDetail,
   useIonToast
 } from '@ionic/react';
-import { add, alertCircle, bulbSharp } from 'ionicons/icons';
+import { add, alertCircle, alertCircleSharp, bulbSharp } from 'ionicons/icons';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
@@ -62,6 +63,7 @@ const Dashboard: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showBillModal, setShowBillModal] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [togglingBills, setTogglingBills] = useState<Set<string>>(new Set());
   const hasFetchedRef = useRef(false);
 
   const fetchBills = useCallback(async () => {
@@ -167,23 +169,32 @@ const Dashboard: React.FC = () => {
   const togglePaid = async (bill: BillWithPaymentStatus, monthToToggle?: 'current' | 'effective') => {
     if (!user) return;
 
-    const currentDate = new Date();
+    setTogglingBills(prev => new Set(prev).add(bill.id));
+
+    // const currentDate = new Date();
     const paymentMonth = monthToToggle === 'current'
-      ? new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).toISOString().split('T')[0]
+      ? new Date().toISOString().split('T')[0].substring(0, 8) + '01'
       : new Date(bill.effective_due_date).toISOString().split('T')[0].substring(0, 7) + '-01';
 
     try {
       const payments = await billService.getPaymentHistory(bill.id);
-      const existingPayment = payments.find(p => p.payment_month === paymentMonth);
+      const existingPayment = payments
+        .sort((a, b) => new Date(b.payment_month).getTime() - new Date(a.payment_month).getTime())
+        .find(p => p.payment_month === paymentMonth);
 
       if (existingPayment) {
         // Delete the payment
         await billService.deletePayment(existingPayment.id);
         presentToast({
-          message: 'Payment unmarked',
+          message: 'Payment marked as unpaid',
           duration: 2000,
           color: 'warning',
         });
+
+        // Update the next_due_date to previous month's due date in bills table
+        const effectiveDate = new Date(bill.effective_due_date);
+        const previousMonthDate = new Date(effectiveDate.getFullYear(), effectiveDate.getMonth() - 1, effectiveDate.getDate());
+        await billService.updateBill(bill.id, { next_due_date: previousMonthDate.toISOString() });
       } else {
         // Record payment
         await billService.recordPayment(bill.id, user.id, bill.amount, paymentMonth);
@@ -191,6 +202,7 @@ const Dashboard: React.FC = () => {
           message: 'Payment recorded!',
           duration: 2000,
           color: 'success',
+          icon: 'checkmark-circle',
         });
       }
       fetchBills();
@@ -200,6 +212,12 @@ const Dashboard: React.FC = () => {
         message: 'Failed to update payment',
         duration: 2000,
         color: 'danger',
+      });
+    } finally {
+      setTogglingBills(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(bill.id);
+        return newSet;
       });
     }
   };
@@ -257,6 +275,7 @@ const Dashboard: React.FC = () => {
     const currentMonth = currentDate.getMonth();
     const currentYear = currentDate.getFullYear();
 
+    console.log({ bills })
     return bills.filter(bill => {
       // Show bills that are due this month OR were paid this month
       const billDate = new Date(bill.effective_due_date);
@@ -269,18 +288,24 @@ const Dashboard: React.FC = () => {
 
   const renderBillItem = (bill: BillWithPaymentStatus) => (
     <IonItem key={bill.id} lines='none'>
-      <IonToggle
-        slot="start"
-        enableOnOffLabels={true}
-        checked={bill.is_current_month_paid}
-        onIonChange={() => togglePaid(bill, 'effective')}
-        className='mr-4'
-      />
+      {togglingBills.has(bill.id) ? (
+        <div slot="start" className="flex items-center justify-center w-12 h-6 mr-4">
+          <IonSpinner name="crescent" />
+        </div>
+      ) : (
+        <IonToggle
+          slot="start"
+          enableOnOffLabels={true}
+          checked={bill.is_current_month_paid}
+          onIonChange={() => togglePaid(bill, 'effective')}
+          className='mr-4'
+        />
+      )}
       <IonLabel className={bill.is_current_month_paid ? 'opacity-50 line-through' : ''}>
         <h2 className="flex items-center gap-2">
           {bill.name}
           {bill.is_overdue && (
-            <IonBadge color="danger" className="text-xs flex items-center">
+            <IonBadge className="text-xs flex items-center bg-red-500">
               <IonIcon icon={alertCircle} className="mr-1" size="small" />
               Overdue
             </IonBadge>
@@ -458,9 +483,10 @@ const Dashboard: React.FC = () => {
                 {/* Overdue Bills */}
                 {categorizedBills.overdue.length > 0 && (
                   <IonList inset={true} className="shadow-md !rounded-2xl !m-0 !mb-4 pt-0">
-                    <IonListHeader color="danger" className="font-semibold">
+                    <IonListHeader className="font-semibold bg-red-500">
                       <div className='flex justify-between w-full pr-4'>
-                        <span>⚠️ Overdue</span>
+
+                        <span className='flex gap-2'><IonIcon icon={alertCircleSharp} className='h-5 w-5 text-yellow-400' /> Overdue</span>
                         <span>{categorizedBills.overdue.length} {categorizedBills.overdue.length > 1 ? 'Bills' : 'Bill'}</span>
                       </div>
                     </IonListHeader>
@@ -532,7 +558,7 @@ const Dashboard: React.FC = () => {
         ) : (
           <>
             <div className="mb-6">
-              <h2 className="text-lg font-semibold p-4">This Month's Bills</h2>
+              <h2 className="text-lg font-semibold p-4">My Current Month's Bills</h2>
               <IonList inset={true} className='p-0 !m-0'>
                 {loading ? (
                   Array.from({ length: 5 }).map((_, idx) => (
@@ -547,13 +573,19 @@ const Dashboard: React.FC = () => {
                     .sort((a, b) => new Date(a.effective_due_date).getTime() - new Date(b.effective_due_date).getTime())
                     .map(bill => (
                       <IonItem key={bill.id}>
-                        <IonToggle
-                          slot="start"
-                          enableOnOffLabels={true}
-                          checked={bill.current_month_paid}
-                          onIonChange={() => togglePaid(bill, 'current')}
-                          className='mr-4'
-                        />
+                        {togglingBills.has(bill.id) ? (
+                          <div slot="start" className="flex items-center justify-center w-12 h-6 mr-4">
+                            <IonSpinner name="crescent" />
+                          </div>
+                        ) : (
+                          <IonToggle
+                            slot="start"
+                            enableOnOffLabels={true}
+                            checked={bill.current_month_paid}
+                            onIonChange={() => togglePaid(bill, 'current')}
+                            className='mr-4'
+                          />
+                        )}
                         <IonLabel >
                           <h2 className={bill.current_month_paid ? 'line-through opacity-60' : ''}>{bill.name}</h2>
                           <p className={bill.current_month_paid ? 'line-through opacity-60' : ''}>{getCategoryName(bill.category_id, categories)} • {formatDueDate(bill)}</p>
