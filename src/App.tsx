@@ -16,6 +16,7 @@ import Dashboard from './pages/Dashboard';
 import HistoryPage from './pages/History';
 import Login from './pages/Login';
 import ManageBills from './pages/ManageBills';
+import Onboarding from './pages/Onboarding';
 import Settings from './pages/Settings';
 import Signup from './pages/Signup';
 
@@ -125,6 +126,10 @@ const App: React.FC = () => (
       <AuthProvider>
         <BrowserRouter>
           <Switch>
+            {/* First-time onboarding, only when not logged in and not completed */}
+            <Route exact path="/onboarding">
+              <Onboarding />
+            </Route>
             <Route exact path="/login">
               <Login />
             </Route>
@@ -132,6 +137,18 @@ const App: React.FC = () => (
               <Signup />
             </Route>
             <Route path="/">
+              <Route
+                exact
+                path="/"
+                render={() => {
+                  const hasOnboarded = localStorage.getItem('hasOnboarded') === 'true';
+                  return hasOnboarded ? (
+                    <Redirect to="/dashboard" />
+                  ) : (
+                    <Redirect to="/onboarding" />
+                  );
+                }}
+              />
               <ProtectedRoutes />
             </Route>
           </Switch>

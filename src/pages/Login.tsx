@@ -29,6 +29,8 @@ const Login: React.FC = () => {
 
         try {
             await signIn(email, password);
+            // Once user logs in, consider onboarding complete
+            localStorage.setItem('hasOnboarded', 'true');
             history.push('/dashboard');
         } catch (error: unknown) {
             const message = error instanceof Error ? error.message : 'Failed to log in';
@@ -99,6 +101,11 @@ const Login: React.FC = () => {
                                 >
                                     Sign Up
                                 </IonButton>
+                                <div className="mt-2">
+                                    <IonButton fill="clear" size="small" onClick={() => history.push('/onboarding')}>
+                                        Learn More
+                                    </IonButton>
+                                </div>
                             </div>
                         </IonCardContent>
                     </IonCard>

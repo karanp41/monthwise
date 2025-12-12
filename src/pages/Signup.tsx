@@ -35,6 +35,8 @@ const Signup: React.FC = () => {
                 duration: 2000,
                 color: 'success',
             });
+            // Once user signs up, consider onboarding complete
+            localStorage.setItem('hasOnboarded', 'true');
             history.push('/dashboard');
         } catch (error: any) {
             presentToast({
@@ -114,6 +116,11 @@ const Signup: React.FC = () => {
                                 >
                                     Log In
                                 </IonButton>
+                                <div className="mt-2">
+                                    <IonButton fill="clear" size="small" onClick={() => history.push('/onboarding')}>
+                                        Learn More
+                                    </IonButton>
+                                </div>
                             </div>
                         </IonCardContent>
                     </IonCard>
