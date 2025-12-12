@@ -28,7 +28,7 @@ import {
   RefresherEventDetail,
   useIonToast
 } from '@ionic/react';
-import { add, alertCircle, alertCircleSharp, bulbSharp } from 'ionicons/icons';
+import { add, alertCircle, alertCircleSharp, calendarSharp, listOutline } from 'ionicons/icons';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
@@ -58,7 +58,7 @@ const Dashboard: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [userProfile, setUserProfile] = useState<User | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [activeTab, setActiveTab] = useState<'overview' | 'thisMonth'>('overview');
+  const [view, setView] = useState<'calendar' | 'checklist'>('calendar');
   const [presentToast] = useIonToast();
   const [calendarDate, setCalendarDate] = useState<Date | null>(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -443,114 +443,114 @@ const Dashboard: React.FC = () => {
           <IonRefresherContent />
         </IonRefresher>
 
-        {/* Calendar Overview */}
-        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-          <IonIcon icon={bulbSharp} />
-          Smart Bill Calendar</h2>
-        <div className="dashboard-calendar-container mb-6">
-          <Calendar
-            className="border rounded-2xl shadow-md bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
-            value={calendarDate}
-            onChange={
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              (value: any) => setCalendarDate((Array.isArray(value) ? value[0] : value) as Date | null)
-            }
-            tileContent={({ date }: { date: Date }) => {
-              const dateStr = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
-              const bills: BillWithPaymentStatus[] = billsByDate[dateStr] || [];
-              return (
-                <div className="calendar-icons" style={{ minHeight: 18, paddingTop: 2 }}>
-                  {bills.map((bill: BillWithPaymentStatus, idx: number) => (
-                    <span key={bill.id} style={{ marginLeft: idx > 0 ? 2 : 0, paddingRight: 6, fontSize: 12, zIndex: 10 - idx, position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
-                      {getCategoryName(bill.category_id, categories).split(' ')[0]}
-                      {/* <small style={{ fontSize: 8, marginLeft: 1, fontWeight: 'bold' }}>
-                        {bill.is_current_month_paid ? 'P' : 'U'}
-                      </small> */}
-                    </span>
-                  ))}
-                </div>
-              );
-            }}
-            tileClassName={({ date }: { date: Date }) => {
-              const dateStr = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
-              const bills: BillWithPaymentStatus[] = billsByDate[dateStr] || [];
-              if (bills.length === 0) return '';
-
-              const now = new Date();
-              let hasOverdue = false;
-              let hasDueSoonUnpaid = false;
-              let allPaid = true;
-              let hasUnpaidAfter3Days = false;
-
-              bills.forEach((bill) => {
-                if (bill.is_overdue) hasOverdue = true;
-                if (!bill.is_current_month_paid) {
-                  allPaid = false;
-                  // Check if due in next 3 days (including today)
-                  const dueDate = new Date(bill.effective_due_date);
-                  const diffDays = Math.ceil((dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-                  if (diffDays >= 0 && diffDays <= 2) hasDueSoonUnpaid = true;
-                  if (diffDays > 2) hasUnpaidAfter3Days = true;
-                }
-              });
-
-              if (hasOverdue) return 'calendar-tile-overdue';
-              if (hasDueSoonUnpaid) return 'calendar-tile-due-soon';
-              if (allPaid) return 'calendar-tile-all-paid';
-              if (hasUnpaidAfter3Days) return 'calendar-tile-unpaid-later';
-              return '';
-            }}
-            onClickDay={(date) => { setSelectedDate(date); setShowBillModal(true); }}
-          />
-        </div>
-
-        {/* Bill Details Modal */}
-        <IonModal isOpen={showBillModal} onDidDismiss={() => setShowBillModal(false)}>
-          <IonHeader>
-            <IonToolbar>
-              <IonTitle>
-                Bills for {selectedDate ? selectedDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : ''}
-              </IonTitle>
-              <IonButtons slot="end">
-                <IonButton onClick={() => setShowBillModal(false)} color={'danger'}>Close</IonButton>
-              </IonButtons>
-            </IonToolbar>
-          </IonHeader>
-          <IonContent>
-            {selectedDate && (
-              <IonList>
-                {(() => {
-                  const dateStr = selectedDate.getFullYear() + '-' + String(selectedDate.getMonth() + 1).padStart(2, '0') + '-' + String(selectedDate.getDate()).padStart(2, '0');
-                  const billsForDate = billsByDate[dateStr] || [];
-                  return billsForDate.length > 0 ? (
-                    billsForDate.map(renderBillItem)
-                  ) : (
-                    <IonItem>
-                      <IonLabel>No bills due on this date.</IonLabel>
-                    </IonItem>
-                  );
-                })()}
-              </IonList>
-            )}
-          </IonContent>
-        </IonModal>
-
-        {/* Tabs */}
+        {/* View Toggle */}
         <IonSegment
-          value={activeTab}
-          onIonChange={(e) => setActiveTab(e.detail.value as 'overview' | 'thisMonth')}
+          value={view}
+          onIonChange={(e) => setView(e.detail.value as 'calendar' | 'checklist')}
           className="mb-4"
         >
-          <IonSegmentButton value="overview">
-            <IonLabel>Overview</IonLabel>
+          <IonSegmentButton value="calendar">
+            <IonIcon icon={calendarSharp} className='h-6 w-6' />
           </IonSegmentButton>
-          <IonSegmentButton value="thisMonth">
-            <IonLabel>This Month</IonLabel>
+          <IonSegmentButton value="checklist">
+            <IonIcon icon={listOutline} className='h-6 w-6' />
           </IonSegmentButton>
         </IonSegment>
 
-        {activeTab === 'overview' ? (
+        {view === 'calendar' ? (
           <>
+            {/* Calendar Overview */}
+            {/* <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <IonIcon icon={bulbSharp} />
+              Smart Bill Calendar</h2> */}
+            <div className="dashboard-calendar-container mb-6">
+              <Calendar
+                className="border rounded-2xl shadow-md bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
+                value={calendarDate}
+                onChange={
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  (value: any) => setCalendarDate((Array.isArray(value) ? value[0] : value) as Date | null)
+                }
+                tileContent={({ date }: { date: Date }) => {
+                  const dateStr = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
+                  const bills: BillWithPaymentStatus[] = billsByDate[dateStr] || [];
+                  return (
+                    <div className="calendar-icons" style={{ minHeight: 18, paddingTop: 2 }}>
+                      {bills.map((bill: BillWithPaymentStatus, idx: number) => (
+                        <span key={bill.id} style={{ marginLeft: idx > 0 ? 2 : 0, paddingRight: 6, fontSize: 12, zIndex: 10 - idx, position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+                          {getCategoryName(bill.category_id, categories).split(' ')[0]}
+                          {/* <small style={{ fontSize: 8, marginLeft: 1, fontWeight: 'bold' }}>
+                            {bill.is_current_month_paid ? 'P' : 'U'}
+                          </small> */}
+                        </span>
+                      ))}
+                    </div>
+                  );
+                }}
+                tileClassName={({ date }: { date: Date }) => {
+                  const dateStr = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
+                  const bills: BillWithPaymentStatus[] = billsByDate[dateStr] || [];
+                  if (bills.length === 0) return '';
+
+                  const now = new Date();
+                  let hasOverdue = false;
+                  let hasDueSoonUnpaid = false;
+                  let allPaid = true;
+                  let hasUnpaidAfter3Days = false;
+
+                  bills.forEach((bill) => {
+                    if (bill.is_overdue) hasOverdue = true;
+                    if (!bill.is_current_month_paid) {
+                      allPaid = false;
+                      // Check if due in next 3 days (including today)
+                      const dueDate = new Date(bill.effective_due_date);
+                      const diffDays = Math.ceil((dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+                      if (diffDays >= 0 && diffDays <= 2) hasDueSoonUnpaid = true;
+                      if (diffDays > 2) hasUnpaidAfter3Days = true;
+                    }
+                  });
+
+                  if (hasOverdue) return 'calendar-tile-overdue';
+                  if (hasDueSoonUnpaid) return 'calendar-tile-due-soon';
+                  if (allPaid) return 'calendar-tile-all-paid';
+                  if (hasUnpaidAfter3Days) return 'calendar-tile-unpaid-later';
+                  return '';
+                }}
+                onClickDay={(date) => { setSelectedDate(date); setShowBillModal(true); }}
+              />
+            </div>
+
+            {/* Bill Details Modal */}
+            <IonModal isOpen={showBillModal} onDidDismiss={() => setShowBillModal(false)}>
+              <IonHeader>
+                <IonToolbar>
+                  <IonTitle>
+                    Bills for {selectedDate ? selectedDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : ''}
+                  </IonTitle>
+                  <IonButtons slot="end">
+                    <IonButton onClick={() => setShowBillModal(false)} color={'danger'}>Close</IonButton>
+                  </IonButtons>
+                </IonToolbar>
+              </IonHeader>
+              <IonContent>
+                {selectedDate && (
+                  <IonList>
+                    {(() => {
+                      const dateStr = selectedDate.getFullYear() + '-' + String(selectedDate.getMonth() + 1).padStart(2, '0') + '-' + String(selectedDate.getDate()).padStart(2, '0');
+                      const billsForDate = billsByDate[dateStr] || [];
+                      return billsForDate.length > 0 ? (
+                        billsForDate.map(renderBillItem)
+                      ) : (
+                        <IonItem>
+                          <IonLabel>No bills due on this date.</IonLabel>
+                        </IonItem>
+                      );
+                    })()}
+                  </IonList>
+                )}
+              </IonContent>
+            </IonModal>
+
             {loading ? (
               <>
                 {/* Loading Skeletons */}
@@ -659,7 +659,7 @@ const Dashboard: React.FC = () => {
         ) : (
           <>
             <div className="mb-6">
-              <h2 className="text-lg font-semibold p-4">My Current Month's Bills</h2>
+              {/* <h2 className="text-lg font-semibold p-4">My Current Month's Bills</h2> */}
               <IonList inset={true} className='p-0 !m-0 shadow-md !rounded-2xl'>
                 {loading ? (
                   Array.from({ length: 5 }).map((_, idx) => (
