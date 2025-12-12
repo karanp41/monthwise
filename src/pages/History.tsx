@@ -13,6 +13,7 @@ import {
 } from '@ionic/react';
 import { checkmarkCircle } from 'ionicons/icons';
 import React, { useEffect, useState } from 'react';
+import { BottomSpacer } from '../components/BottomSpacer';
 import { useAuth } from '../context/AuthContext';
 import { BillPayment, Category } from '../models/types';
 import { billService } from '../services/billService';
@@ -84,7 +85,7 @@ const HistoryPage: React.FC = () => {
         </IonToolbar>
       </IonHeader>
       <IonContent fullscreen>
-        <IonList inset={true}>
+        <IonList inset={true} className='!rounded-2xl shadow-md m-4'>
           {loading ? (
             Array.from({ length: 5 }).map((_, idx) => (
               <div key={idx}>{renderSkeletonPaymentItem()}</div>
@@ -115,6 +116,8 @@ const HistoryPage: React.FC = () => {
             ))
           )}
         </IonList>
+
+        <BottomSpacer />
       </IonContent>
     </IonPage>
   );

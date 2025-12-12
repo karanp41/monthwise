@@ -26,6 +26,7 @@ import {
   IonToggle,
   IonToolbar,
   RefresherEventDetail,
+  useIonAlert,
   useIonToast
 } from '@ionic/react';
 import { add, alertCircle, alertCircleSharp, calendarSharp, listOutline } from 'ionicons/icons';
@@ -60,6 +61,7 @@ const Dashboard: React.FC = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [view, setView] = useState<'calendar' | 'checklist'>('calendar');
   const [presentToast] = useIonToast();
+  const [presentAlert] = useIonAlert();
   const [calendarDate, setCalendarDate] = useState<Date | null>(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showBillModal, setShowBillModal] = useState(false);
@@ -222,8 +224,6 @@ const Dashboard: React.FC = () => {
   const togglePaid = async (bill: BillWithPaymentStatus, monthToToggle?: 'current' | 'effective') => {
     if (!user) return;
 
-    setTogglingBills(prev => new Set(prev).add(bill.id));
-
     // const currentDate = new Date();
     const paymentMonth = monthToToggle === 'current'
       ? new Date().toISOString().split('T')[0].substring(0, 8) + '01'
@@ -234,6 +234,39 @@ const Dashboard: React.FC = () => {
       const existingPayment = payments
         .sort((a, b) => new Date(b.payment_month).getTime() - new Date(a.payment_month).getTime())
         .find(p => p.payment_month === paymentMonth);
+
+      // If unmarking a paid bill, ask for confirmation first
+      if (existingPayment) {
+        const monthLabel = (() => {
+          if (monthToToggle === 'current') {
+            const now = new Date();
+            return now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+          } else {
+            const eff = new Date(bill.effective_due_date);
+            return eff.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+          }
+        })();
+
+        const role: string = await new Promise((resolve) => {
+          presentAlert({
+            header: 'Mark as Unpaid?',
+            message: `Do you want to mark "${bill.name}" as unpaid for ${monthLabel}?`,
+            buttons: [
+              { text: 'Cancel', role: 'cancel' },
+              { text: 'Yes, Unmark', role: 'confirm' }
+            ],
+            onDidDismiss: (e) => resolve(e.detail.role)
+          });
+        });
+
+        if (role !== 'confirm') {
+          // User cancelled; keep toggle state unchanged
+          return;
+        }
+      }
+
+      // Show spinner only for actual mutations
+      setTogglingBills(prev => new Set(prev).add(bill.id));
 
       if (existingPayment) {
         // Delete the payment
