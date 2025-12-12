@@ -255,7 +255,7 @@ const Dashboard: React.FC = () => {
               { text: 'Cancel', role: 'cancel' },
               { text: 'Yes, Unmark', role: 'confirm' }
             ],
-            onDidDismiss: (e) => resolve(e.detail.role)
+            onDidDismiss: (e: any) => resolve(e.detail.role)
           });
         });
 
