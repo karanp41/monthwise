@@ -66,7 +66,7 @@ ion-segment-button.segment-button-checked {
   --indicator-color: transparent;
   background: var(--accent-gradient);
   color: white;
-  border-radius: 8px;
+  border-radius: 12px;
 }
 
 /* Tab bar active icon with primary color */

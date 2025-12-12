@@ -1,3 +1,4 @@
+/* eslint-disable  @typescript-eslint/no-explicit-any */
 import {
   IonBadge,
   IonButton,
@@ -64,6 +65,7 @@ const Dashboard: React.FC = () => {
   const [showBillModal, setShowBillModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [togglingBills, setTogglingBills] = useState<Set<string>>(new Set());
+  const [remindersMap, setRemindersMap] = useState<Record<string, number>>({});
   const hasFetchedRef = useRef(false);
 
   const fetchBills = useCallback(async () => {
@@ -76,6 +78,15 @@ const Dashboard: React.FC = () => {
         ]);
         setBills(billsData);
         setCategories(categoriesData);
+        // Fetch notify_before_days for these bills
+        try {
+          const ids = billsData.map(b => b.id);
+          const map = await reminderService.getRemindersForBills(ids);
+          setRemindersMap(map);
+        } catch (e) {
+          console.warn('Failed to fetch reminders for bills', e);
+          setRemindersMap({});
+        }
       } catch (error) {
         console.error('Error fetching bills:', error);
       } finally {
@@ -91,6 +102,48 @@ const Dashboard: React.FC = () => {
       reminderService.requestPermissions();
     }
   }, [user, fetchBills]);
+
+  // When bills list changes (and on app open), schedule pending daily window reminders
+  useEffect(() => {
+    (async () => {
+      if (!user || bills.length === 0) return;
+      try {
+        const pendingBillsFull = bills.filter(b => !b.current_month_paid);
+        const pendingBillsForSchedule = pendingBillsFull.map(b => ({
+          ...b,
+          due_date: b.effective_due_date,
+          is_paid: b.current_month_paid,
+          notify_before_days: remindersMap[b.id] ?? 0,
+        })) as any;
+
+        // 1) Immediate summary notification
+        await reminderService.schedulePendingSummaryNotification(pendingBillsFull.length);
+
+        // 2) Immediate bill notifications for those inside their reminder window today
+        const now = new Date();
+        const immediateTargets = pendingBillsFull
+          .filter(b => {
+            const notifyBefore: number = remindersMap[b.id] ?? 0;
+            if (!notifyBefore) return false;
+            const due = new Date(b.effective_due_date);
+            const diffDays = Math.ceil((due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+            return diffDays >= 0 && diffDays <= notifyBefore; // inside window including today
+          })
+          .sort((a, b) => new Date(a.effective_due_date).getTime() - new Date(b.effective_due_date).getTime())
+          .slice(0, 3); // avoid spamming, limit to first three
+
+        // console.log('Scheduling immediate notifications for bills:', immediateTargets, pendingBillsFull);
+        for (const b of immediateTargets) {
+          await reminderService.scheduleImmediateBillNotification({ id: b.id, name: b.name, amount: b.amount }, 3000);
+        }
+
+        // 3) Schedule daily window notifications
+        await reminderService.schedulePendingBillsDailyWindow(pendingBillsForSchedule as any);
+      } catch (e) {
+        console.error('Failed to schedule pending bill reminders on app open/change:', e);
+      }
+    })();
+  }, [user, bills, remindersMap]);
 
   useEffect(() => {
     if (user) {
@@ -275,7 +328,6 @@ const Dashboard: React.FC = () => {
     const currentMonth = currentDate.getMonth();
     const currentYear = currentDate.getFullYear();
 
-    console.log({ bills })
     return bills.filter(bill => {
       // Show bills that are due this month OR were paid this month
       const billDate = new Date(bill.effective_due_date);
@@ -335,6 +387,55 @@ const Dashboard: React.FC = () => {
       <IonHeader>
         <IonToolbar>
           <IonTitle>Hi, {userProfile?.name || 'User'}</IonTitle>
+          {import.meta.env.DEV && (
+            <IonButtons slot="end">
+              <IonButton
+                size="small"
+                onClick={async () => {
+                  try {
+                    const ok = await reminderService.scheduleTestNotification({
+                      title: 'MonthWise Test',
+                      body: 'This should fire in ~5 seconds.',
+                      delayMs: 5000,
+                    });
+                    presentToast({
+                      message: ok ? 'Scheduled test notification.' : 'Notification permissions not granted.',
+                      duration: 2000,
+                      color: ok ? 'success' : 'warning',
+                    });
+                  } catch (e) {
+                    console.error(e);
+                    presentToast({ message: 'Failed to schedule test notification.', duration: 2000, color: 'danger' });
+                  }
+                }}
+              >
+                Test Notify
+              </IonButton>
+              <IonButton
+                size="small"
+                onClick={async () => {
+                  try {
+                    const upcoming = [...bills]
+                      .filter(b => !b.is_current_month_paid)
+                      .sort((a, b) => new Date(a.effective_due_date).getTime() - new Date(b.effective_due_date).getTime())
+                      .slice(0, 5)
+                      .map(b => ({ id: b.id, name: b.name, amount: b.amount }));
+                    const ok = await reminderService.scheduleBatchImmediateBillNotifications(upcoming, 3000, 1500);
+                    presentToast({
+                      message: ok ? `Scheduled ${upcoming.length} test bill notification(s).` : 'Notification permissions not granted.',
+                      duration: 2000,
+                      color: ok ? 'success' : 'warning',
+                    });
+                  } catch (e) {
+                    console.error(e);
+                    presentToast({ message: 'Failed to schedule batch notifications.', duration: 2000, color: 'danger' });
+                  }
+                }}
+              >
+                Trigger Bills
+              </IonButton>
+            </IonButtons>
+          )}
         </IonToolbar>
       </IonHeader>
       <IonContent fullscreen className="ion-padding">
@@ -348,7 +449,7 @@ const Dashboard: React.FC = () => {
           Smart Bill Calendar</h2>
         <div className="dashboard-calendar-container mb-6">
           <Calendar
-            className="border rounded-lg shadow-md bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
+            className="border rounded-2xl shadow-md bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
             value={calendarDate}
             onChange={
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -559,7 +660,7 @@ const Dashboard: React.FC = () => {
           <>
             <div className="mb-6">
               <h2 className="text-lg font-semibold p-4">My Current Month's Bills</h2>
-              <IonList inset={true} className='p-0 !m-0'>
+              <IonList inset={true} className='p-0 !m-0 shadow-md !rounded-2xl'>
                 {loading ? (
                   Array.from({ length: 5 }).map((_, idx) => (
                     <div key={idx}>{renderSkeletonBillItem()}</div>

@@ -77,7 +77,7 @@ const Settings: React.FC = () => {
         </IonToolbar>
       </IonHeader>
       <IonContent fullscreen>
-        <IonList inset={true}>
+        <IonList inset={true} className='!rounded-2xl shadow-md'>
           <IonItem>
             <IonLabel>
               <h2>Account</h2>

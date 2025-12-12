@@ -45,14 +45,14 @@ const Login: React.FC = () => {
     return (
         <IonPage>
             <IonContent className="ion-padding">
-                <div className="flex items-center justify-center min-h-full">
-                    <IonCard className="w-full max-w-md">
+                <div className="flex flex-col items-center justify-center min-h-full">
+                    <img
+                        src="/monthwise-logo-tagline.png"
+                        alt="MonthWise Logo"
+                        className="mx-auto h-128 w-auto"
+                    />
+                    <IonCard className="w-full max-w-md rounded-2xl shadow-md">
                         <IonCardHeader className="text-center">
-                            <img
-                                src="/monthwise-logo.png"
-                                alt="MonthWise Logo"
-                                className="mx-auto mb-4 h-16 w-auto"
-                            />
                             {/* <IonCardTitle className="text-center text-2xl">
                                 Welcome to MonthWise
                             </IonCardTitle> */}

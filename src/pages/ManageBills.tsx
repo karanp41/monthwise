@@ -23,6 +23,7 @@ import {
 import { add, create, trash } from 'ionicons/icons';
 import React, { useCallback, useEffect, useState } from 'react';
 import AddBillForm from '../components/AddBillForm';
+import { BottomSpacer } from '../components/BottomSpacer';
 import { useAuth } from '../context/AuthContext';
 import { Bill, Category, User } from '../models/types';
 import { billService } from '../services/billService';
@@ -198,7 +199,7 @@ const ManageBills: React.FC = () => {
                 </IonToolbar>
             </IonHeader>
             <IonContent fullscreen>
-                <IonCard>
+                <IonCard className="rounded-2xl shadow-md m-4">
                     <IonCardHeader>
                         <IonCardTitle>
                             Bills by Category {loading ? '' : `(${bills.length})`}
@@ -329,6 +330,7 @@ const ManageBills: React.FC = () => {
                     </IonCardContent>
                 </IonCard>
 
+                <BottomSpacer />
                 <IonFab vertical="bottom" horizontal="end" slot="fixed" style={{ bottom: '100px' }}>
                     <IonFabButton onClick={() => setShowAddModal(true)}>
                         <IonIcon icon={add} />
