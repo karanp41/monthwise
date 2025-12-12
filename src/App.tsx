@@ -128,18 +128,8 @@ const App: React.FC = () => (
         <IonReactRouter>
           <IonRouterOutlet>
             {/* First-time onboarding, only when not logged in and not completed */}
-            <Route exact path="/onboarding">
-              <Onboarding />
-            </Route>
-            <Route exact path="/login">
-              <Login />
-            </Route>
-            <Route exact path="/signup">
-              <Signup />
-            </Route>
             <Route path="/">
               <Route
-                exact
                 path="/"
                 render={() => {
                   const hasOnboarded = localStorage.getItem('hasOnboarded') === 'true';
@@ -152,6 +142,10 @@ const App: React.FC = () => (
               />
               <ProtectedRoutes />
             </Route>
+            <Route exact path="/onboarding" component={Onboarding} />
+            <Route exact path="/login" component={Login} />
+            <Route exact path="/signup" component={Signup} />
+
           </IonRouterOutlet>
         </IonReactRouter>
       </AuthProvider>
