@@ -73,3 +73,7 @@ ion-segment-button.segment-button-checked {
 ion-tab-button.tab-selected {
   --color-selected: var(--primary-color);
 }
+
+ion-tab-bar {
+  z-index: 1;
+}

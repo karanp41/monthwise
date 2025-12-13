@@ -1,6 +1,5 @@
 import { Session, User } from '@supabase/supabase-js';
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { categoryService } from '../services/categoryService';
 import { supabase } from '../services/supabase';
 import { userService } from '../services/userService';
 
@@ -82,7 +81,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             await userService.createUser(data.user.id, email, name);
 
             // Create default categories for the new user
-            await categoryService.createDefaultCategories(data.user.id);
+            // await categoryService.createDefaultCategories(data.user.id);
         }
     };
 

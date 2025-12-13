@@ -35,9 +35,8 @@ const Signup: React.FC = () => {
                 duration: 2000,
                 color: 'success',
             });
-            // Once user signs up, consider onboarding complete
-            localStorage.setItem('hasOnboarded', 'true');
-            history.push('/dashboard');
+            // Start guided onboarding for first-time users
+            history.push('/onboarding/currency');
         } catch (error: any) {
             presentToast({
                 message: error.message || 'Failed to create account',
@@ -54,11 +53,11 @@ const Signup: React.FC = () => {
             <IonContent className="ion-padding">
                 <div className="flex flex-col  items-center justify-center min-h-full">
                     <img
-                        src="/monthwise-logo-tagline.png"
+                        src="/monthwise-logo-tagline-cropped.png"
                         alt="MonthWise Logo"
-                        className="mx-auto h-128 w-auto"
+                        className="mx-auto h-40 w-auto mb-2"
                     />
-                    <IonCard className="w-full max-w-md">
+                    <IonCard className="w-full max-w-md rounded-2xl shadow-md">
                         <IonCardHeader>
                             <IonCardTitle className="text-center text-2xl">
                                 Create Account
@@ -106,16 +105,18 @@ const Signup: React.FC = () => {
                                 </IonButton>
                             </form>
                             <div className="text-center mt-4">
-                                <IonText color="medium">
-                                    Already have an account?{' '}
-                                </IonText>
-                                <IonButton
-                                    fill="clear"
-                                    size="small"
-                                    onClick={() => history.push('/login')}
-                                >
-                                    Log In
-                                </IonButton>
+                                <div className="flex justify-center items-center gap-1">
+                                    <IonText color="medium">
+                                        Already have an account?{' '}
+                                    </IonText>
+                                    <IonButton
+                                        fill="clear"
+                                        size="small"
+                                        onClick={() => history.push('/login')}
+                                    >
+                                        Log In
+                                    </IonButton>
+                                </div>
                                 <div className="mt-2">
                                     <IonButton fill="clear" size="small" onClick={() => history.push('/onboarding')}>
                                         Learn More

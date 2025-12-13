@@ -17,6 +17,8 @@ import HistoryPage from './pages/History';
 import Login from './pages/Login';
 import ManageBills from './pages/ManageBills';
 import Onboarding from './pages/Onboarding';
+import AddFirstBill from './pages/onboarding/AddFirstBill';
+import SelectCurrency from './pages/onboarding/SelectCurrency';
 import Settings from './pages/Settings';
 import Signup from './pages/Signup';
 
@@ -48,6 +50,7 @@ import '@ionic/react/css/text-transformation.css';
 import '@ionic/react/css/palettes/dark.system.css';
 
 /* Theme variables */
+import './theme/global.css';
 import './theme/variables.css';
 
 setupIonicReact();
@@ -129,6 +132,12 @@ const App: React.FC = () => (
             {/* First-time onboarding, only when not logged in and not completed */}
             <Route exact path="/onboarding">
               <Onboarding />
+            </Route>
+            <Route exact path="/onboarding/currency">
+              <SelectCurrency />
+            </Route>
+            <Route exact path="/onboarding/add-bill">
+              <AddFirstBill />
             </Route>
             <Route exact path="/login">
               <Login />

@@ -40,7 +40,9 @@ import { billService } from '../services/billService';
 import { categoryService } from '../services/categoryService';
 import './Dashboard.css';
 
+import { useHistory } from 'react-router-dom';
 import { BottomSpacer } from '../components/BottomSpacer';
+import GuidedOverlay from '../components/GuidedOverlay';
 import { reminderService } from '../services/reminderService';
 import { userService } from '../services/userService';
 import { getCategoryName, getCurrencySymbol } from '../services/utilService';
@@ -68,6 +70,9 @@ const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [togglingBills, setTogglingBills] = useState<Set<string>>(new Set());
   const [remindersMap, setRemindersMap] = useState<Record<string, number>>({});
+  const [showCalendarOverlay, setShowCalendarOverlay] = useState(false);
+  const [showChecklistOverlay, setShowChecklistOverlay] = useState(false);
+  const history = useHistory();
   const hasFetchedRef = useRef(false);
 
   const fetchBills = useCallback(async () => {
@@ -76,7 +81,7 @@ const Dashboard: React.FC = () => {
       try {
         const [billsData, categoriesData] = await Promise.all([
           billService.getBillsWithPaymentStatus(user.id),
-          categoryService.getCategories(user.id)
+          categoryService.getCategories()
         ]);
         setBills(billsData);
         setCategories(categoriesData);
@@ -165,6 +170,55 @@ const Dashboard: React.FC = () => {
       }
     }
   }, [user]);
+
+  // Determine if we should show guided overlays
+  useEffect(() => {
+    if (!user || !userProfile) return;
+    const url = new URL(window.location.href);
+    const fromParam = url.searchParams.get('tour');
+
+    if (!userProfile.onboarding_calendar_tour_done && (fromParam === 'calendar' || userProfile.onboarding_first_bill_added)) {
+      setView('calendar');
+      setShowCalendarOverlay(true);
+    }
+  }, [user, userProfile]);
+
+  const handleCalendarOverlayNext = async () => {
+    if (!user) return;
+    try {
+      await userService.updateUser(user.id, { onboarding_calendar_tour_done: true });
+      // Update local cached profile
+      const updated = await userService.getUser(user.id);
+
+      // Update local storage cache
+      localStorage.setItem(`userProfile_${user.id}`, JSON.stringify(updated));
+
+      setUserProfile(updated);
+    } catch {
+      console.error('Failed to update onboarding_calendar_tour_done');
+    }
+    setShowCalendarOverlay(false);
+    setView('checklist');
+    setShowChecklistOverlay(true);
+    const url = new URL(window.location.href);
+    url.searchParams.delete('tour');
+    history.replace(url.pathname + url.search);
+  };
+
+  const handleChecklistOverlayNext = async () => {
+    if (!user) return;
+    try {
+      await userService.updateUser(user.id, { onboarding_checklist_tour_done: true });
+      const updated = await userService.getUser(user.id);
+      // Update local storage cache
+      localStorage.setItem(`userProfile_${user.id}`, JSON.stringify(updated));
+      setUserProfile(updated);
+    } catch {
+      console.error('Failed to update onboarding_checklist_tour_done');
+    }
+    setShowChecklistOverlay(false);
+    history.replace('/manage-bills?tour=bills');
+  };
 
   // Map of date string (YYYY-MM-DD) to bills due on that date
   const billsByDate = React.useMemo(() => {
@@ -759,6 +813,24 @@ const Dashboard: React.FC = () => {
           </IonContent>
         </IonModal>
       </IonContent>
+      {showCalendarOverlay && (
+        <GuidedOverlay
+          targetSelector={'.dashboard-calendar-container'}
+          title="Calendar Overview"
+          description="This calendar highlights due dates. Tap a day to view bills due on that date. Colors indicate urgency."
+          primaryText="Next"
+          onPrimary={handleCalendarOverlayNext}
+        />
+      )}
+      {showChecklistOverlay && (
+        <GuidedOverlay
+          targetSelector={'ion-segment'}
+          title="Monthly Checklist"
+          description="In the list view, quickly mark bills paid or unpaid for this month with a single toggle."
+          primaryText="Got it"
+          onPrimary={handleChecklistOverlayNext}
+        />
+      )}
     </IonPage>
   );
 };

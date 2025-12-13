@@ -41,7 +41,7 @@ const HistoryPage: React.FC = () => {
         try {
           const [paymentsData, categoriesData] = await Promise.all([
             billService.getAllPaymentHistory(user.id),
-            categoryService.getCategories(user.id)
+            categoryService.getCategories()
           ]);
           setPayments(paymentsData);
           setCategories(categoriesData);

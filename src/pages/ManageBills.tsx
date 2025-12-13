@@ -24,6 +24,7 @@ import { add, create, trash } from 'ionicons/icons';
 import React, { useCallback, useEffect, useState } from 'react';
 import AddBillForm from '../components/AddBillForm';
 import { BottomSpacer } from '../components/BottomSpacer';
+import GuidedOverlay from '../components/GuidedOverlay';
 import { useAuth } from '../context/AuthContext';
 import { Bill, Category, User } from '../models/types';
 import { billService } from '../services/billService';
@@ -41,6 +42,7 @@ const ManageBills: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [presentAlert] = useIonAlert();
     const [presentToast] = useIonToast();
+    const [showBillsOverlay, setShowBillsOverlay] = useState(false);
 
     const fetchData = useCallback(async () => {
         if (user) {
@@ -62,7 +64,7 @@ const ManageBills: React.FC = () => {
 
                 const [billsData, categoriesData] = await Promise.all([
                     billService.getBills(user.id),
-                    categoryService.getCategories(user.id)
+                    categoryService.getCategories()
                 ]);
 
                 setBills(billsData);
@@ -78,6 +80,15 @@ const ManageBills: React.FC = () => {
     useEffect(() => {
         fetchData();
     }, [fetchData]);
+
+    useEffect(() => {
+        // Decide whether to show final onboarding overlay
+        const url = new URL(window.location.href);
+        const fromParam = url.searchParams.get('tour');
+        if (userProfile && (fromParam === 'bills' || !userProfile.onboarding_bills_page_tour_done)) {
+            setShowBillsOverlay(true);
+        }
+    }, [userProfile]);
 
     const handleAddBill = async (data: Omit<Bill, 'id' | 'created_at' | 'updated_at' | 'user_id' | 'is_paid'>) => {
         if (user) {
@@ -373,6 +384,37 @@ const ManageBills: React.FC = () => {
                     </IonContent>
                 </IonModal>
             </IonContent>
+            {showBillsOverlay && (
+                <GuidedOverlay
+                    title="Manage All Bills"
+                    description="Here you can add, edit, or delete bills. Bills are grouped by category for quick management."
+                    primaryText="Finish"
+                    onPrimary={async () => {
+                        setShowBillsOverlay(false);
+                        if (user) {
+                            try {
+                                const updates: any = { onboarding_bills_page_tour_done: true };
+                                // If all onboarding steps are now done, set completion timestamp
+                                const latest = await userService.getUser(user.id);
+                                if (
+                                    latest.onboarding_currency_set &&
+                                    latest.onboarding_first_bill_added &&
+                                    latest.onboarding_calendar_tour_done &&
+                                    latest.onboarding_checklist_tour_done
+                                ) {
+                                    updates.onboarding_completed_at = new Date().toISOString();
+                                }
+                                await userService.updateUser(user.id, updates);
+                            } catch (e) {
+                                // ignore
+                            }
+                        }
+                        const url = new URL(window.location.href);
+                        url.searchParams.delete('tour');
+                        window.history.replaceState({}, '', url.pathname + url.search);
+                    }}
+                />
+            )}
         </IonPage>
     );
 };

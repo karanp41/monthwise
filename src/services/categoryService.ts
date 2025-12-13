@@ -5,8 +5,8 @@ import { supabase } from './supabase';
 const pendingRequests: Map<string, Promise<unknown>> = new Map();
 
 export const categoryService = {
-    async getCategories(userId: string) {
-        const key = `getCategories:${userId}`;
+    async getCategories(userId: string = 'd078231d-31d9-45dc-8af9-1bfbaf9c5fdc') {
+        const key = `getCategories`;
         if (pendingRequests.has(key)) return pendingRequests.get(key) as Promise<Category[]>;
 
         const p = (async () => {

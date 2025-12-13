@@ -14,6 +14,12 @@ export const userService = {
                     email,
                     name,
                     default_currency: 'USD',
+                    onboarding_currency_set: false,
+                    onboarding_first_bill_added: false,
+                    onboarding_calendar_tour_done: false,
+                    onboarding_checklist_tour_done: false,
+                    onboarding_bills_page_tour_done: false,
+                    onboarding_completed_at: null,
                 }
             ])
             .select()

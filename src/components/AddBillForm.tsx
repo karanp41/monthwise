@@ -44,7 +44,7 @@ const AddBillForm: React.FC<AddBillFormProps> = ({ onSubmit, onCancel, initialDa
 
     useEffect(() => {
         if (user) {
-            categoryService.getCategories(user.id).then(setCategories).catch(console.error);
+            categoryService.getCategories().then(setCategories).catch(console.error);
         }
     }, [user]);
 
@@ -72,22 +72,21 @@ const AddBillForm: React.FC<AddBillFormProps> = ({ onSubmit, onCancel, initialDa
 
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="p-4">
-            <IonItem>
+            <IonItem className='rounded-xl'>
                 <IonInput
                     label="Bill Name"
                     labelPlacement="fixed"
-                    fill="solid"
+
                     {...control.register('name', { required: 'Name is required' })}
                 />
             </IonItem>
             {errors.name && <p className="text-red-500 text-sm px-4">{errors.name.message}</p>}
 
-            <IonItem className="mt-4">
+            <IonItem className="mt-4 rounded-xl">
                 <IonSelect
                     label="Category"
                     // className='mt-2'
                     labelPlacement="fixed"
-                    fill="solid"
                     interface="action-sheet"
                     {...control.register('category_id', { required: 'Category is required' })}
                 >
@@ -100,12 +99,11 @@ const AddBillForm: React.FC<AddBillFormProps> = ({ onSubmit, onCancel, initialDa
             </IonItem>
             {errors.category_id && <p className="text-red-500 text-sm px-4">{errors.category_id.message}</p>}
 
-            <IonItem className="mt-4">
+            <IonItem className="mt-4 rounded-xl">
                 <IonSelect
                     // className="mt-2"
                     label="Currency"
                     labelPlacement="fixed"
-                    fill="solid"
                     interface="popover"
                     {...control.register('currency', { required: 'Currency is required' })}
                 >
@@ -118,19 +116,18 @@ const AddBillForm: React.FC<AddBillFormProps> = ({ onSubmit, onCancel, initialDa
             </IonItem>
             {errors.currency && <p className="text-red-500 text-sm px-4">{errors.currency.message}</p>}
 
-            <IonItem className="mt-4">
+            <IonItem className="mt-4 rounded-xl">
                 <IonInput
                     // className="mt-2"
                     label="Amount"
                     type="number"
                     labelPlacement="fixed"
-                    fill="solid"
                     {...control.register('amount', { required: 'Amount is required', min: 0, valueAsNumber: true })}
                 />
             </IonItem>
             {errors.amount && <p className="text-red-500 text-sm px-4">{errors.amount.message}</p>}
 
-            <IonItem className="mt-4">
+            <IonItem className="mt-4 rounded-xl">
                 <IonLabel position="fixed">Due Date</IonLabel>
                 <IonDatetimeButton slot="end" datetime="datetime" />
                 <IonModal keepContentsMounted={true}>
@@ -149,14 +146,12 @@ const AddBillForm: React.FC<AddBillFormProps> = ({ onSubmit, onCancel, initialDa
                 </IonModal>
             </IonItem>
 
-            <IonItem className="mt-4">
+            <IonItem className="mt-4 rounded-xl">
                 <IonSelect
                     // className="mt-2"
                     label="Recurrence"
                     labelPlacement="fixed"
-                    fill="solid"
                     interface="action-sheet"
-
                     {...control.register('recurrence')}
                 >
                     <IonSelectOption value="monthly">Monthly</IonSelectOption>
@@ -166,23 +161,21 @@ const AddBillForm: React.FC<AddBillFormProps> = ({ onSubmit, onCancel, initialDa
                 </IonSelect>
             </IonItem>
 
-            <IonItem className="mt-4">
+            <IonItem className="mt-4 rounded-xl">
                 <IonTextarea
                     // className="mt-2"
                     label="Notes"
                     labelPlacement="fixed"
-                    fill="solid"
                     rows={4}
                     {...control.register('notes')}
                 />
             </IonItem>
 
-            <IonItem className="mt-4">
+            <IonItem className="mt-4 rounded-xl">
                 <IonSelect
                     // className="mt-2"
                     label="Reminder"
                     labelPlacement="fixed"
-                    fill="solid"
                     {...control.register('reminder', { required: 'Reminder is required' })}
                 >
                     <IonSelectOption value="never">Never remind</IonSelectOption>
@@ -194,10 +187,10 @@ const AddBillForm: React.FC<AddBillFormProps> = ({ onSubmit, onCancel, initialDa
             {errors.reminder && <p className="text-red-500 text-sm px-4">{errors.reminder.message}</p>}
 
             <div className="flex justify-end gap-2 mt-6">
-                <IonButton fill="clear" color="medium" onClick={onCancel}>
+                <IonButton fill="clear" color="danger" size="default" onClick={onCancel}>
                     Cancel
                 </IonButton>
-                <IonButton type="submit" expand="block">
+                <IonButton type="submit" expand="block" size="default">
                     {submitButtonText}
                 </IonButton>
             </div>

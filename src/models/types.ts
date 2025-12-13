@@ -4,6 +4,13 @@ export interface User {
     name: string;
     default_currency: string;
     created_at: string;
+    // Onboarding progress flags
+    onboarding_currency_set?: boolean;
+    onboarding_first_bill_added?: boolean;
+    onboarding_calendar_tour_done?: boolean;
+    onboarding_checklist_tour_done?: boolean;
+    onboarding_bills_page_tour_done?: boolean;
+    onboarding_completed_at?: string | null;
 }
 
 export interface Bill {
