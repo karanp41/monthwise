@@ -405,8 +405,16 @@ const ManageBills: React.FC = () => {
                                     updates.onboarding_completed_at = new Date().toISOString();
                                 }
                                 await userService.updateUser(user.id, updates);
+
+                                // Update local profile state
+                                const updatedProfile = { ...userProfile, ...updates } as User;
+                                setUserProfile(updatedProfile);
+
+                                // Update localStorage
+                                const storageKey = `userProfile_${user.id}`;
+                                localStorage.setItem(storageKey, JSON.stringify(updatedProfile));
                             } catch (e) {
-                                // ignore
+                                console.error('Failed to update onboarding status', e);
                             }
                         }
                         const url = new URL(window.location.href);

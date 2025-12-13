@@ -31,7 +31,7 @@ const Signup: React.FC = () => {
         try {
             await signUp(email, password, name);
             presentToast({
-                message: 'Account created successfully!',
+                message: 'Account created successfully! Let\'s get started.',
                 duration: 2000,
                 color: 'success',
             });
