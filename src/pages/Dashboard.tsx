@@ -604,6 +604,8 @@ const Dashboard: React.FC = () => {
                   return '';
                 }}
                 onClickDay={(date) => { setSelectedDate(date); setShowBillModal(true); }}
+                prev2Label={null}
+                next2Label={null}
               />
             </div>
 
@@ -685,9 +687,9 @@ const Dashboard: React.FC = () => {
                 {/* Due Today */}
                 {categorizedBills.dueToday.length > 0 && (
                   <IonList inset={true} className="shadow-md !rounded-2xl !m-0 !mb-4 pt-0">
-                    <IonListHeader color="warning" className="font-semibold">
+                    <IonListHeader className="font-semibold bg-yellow-300 text-yellow-800 dark:bg-yellow-600 dark:text-white">
                       <div className='flex justify-between w-full pr-4'>
-                        <span>🔴 Due Today</span>
+                        <span>Due Today</span>
                         <span>{categorizedBills.dueToday.length} {categorizedBills.dueToday.length > 1 ? 'Bills' : 'Bill'}</span>
                       </div>
                     </IonListHeader>
@@ -698,9 +700,9 @@ const Dashboard: React.FC = () => {
                 {/* Due Tomorrow */}
                 {categorizedBills.dueTomorrow.length > 0 && (
                   <IonList inset={true} className="shadow-md !rounded-2xl !m-0 !mb-4 pt-0">
-                    <IonListHeader color="primary" className="font-semibold">
+                    <IonListHeader className="font-semibold bg-blue-300 text-blue-800 dark:bg-blue-600 dark:text-white">
                       <div className='flex justify-between w-full pr-4'>
-                        <span>🟠 Due Tomorrow</span>
+                        <span>Due Tomorrow</span>
                         <span>{categorizedBills.dueTomorrow.length} {categorizedBills.dueTomorrow.length > 1 ? 'Bills' : 'Bill'}</span>
                       </div>
                     </IonListHeader>
@@ -711,9 +713,9 @@ const Dashboard: React.FC = () => {
                 {/* Due Within 7 Days */}
                 {categorizedBills.dueWithin7Days.length > 0 && (
                   <IonList inset={true} className="shadow-md !rounded-2xl !m-0 !mb-4 pt-0">
-                    <IonListHeader className="font-semibold">
+                    <IonListHeader className="font-semibold bg-gray-300 text-gray-800 dark:bg-gray-600 dark:text-white">
                       <div className='flex justify-between w-full pr-4'>
-                        <span>🟡 Due Within 7 Days</span>
+                        <span>Due Within 7 Days</span>
                         <span>{categorizedBills.dueWithin7Days.length} {categorizedBills.dueWithin7Days.length > 1 ? 'Bills' : 'Bill'}</span>
                       </div>
                     </IonListHeader>
@@ -724,9 +726,9 @@ const Dashboard: React.FC = () => {
                 {/* Due Next 15 Days */}
                 {categorizedBills.dueNext15Days.length > 0 && (
                   <IonList inset={true} className="shadow-md !rounded-2xl !m-0 !mb-4 pt-0">
-                    <IonListHeader className="font-semibold">
+                    <IonListHeader className="font-semibold bg-green-300 text-green-800 dark:bg-green-600 dark:text-white">
                       <div className='flex justify-between w-full pr-4'>
-                        <span>🟢 Due Next 15 Days</span>
+                        <span>Due Next 15 Days</span>
                         <span>{categorizedBills.dueNext15Days.length} {categorizedBills.dueNext15Days.length > 1 ? 'Bills' : 'Bill'}</span>
                       </div>
                     </IonListHeader>
