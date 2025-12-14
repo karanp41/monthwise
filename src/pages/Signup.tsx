@@ -36,7 +36,7 @@ const Signup: React.FC = () => {
                 color: 'success',
             });
             // Start guided onboarding for first-time users
-            history.push('/onboarding/currency');
+            history.replace('/onboarding/currency');
         } catch (error: any) {
             presentToast({
                 message: error.message || 'Failed to create account',

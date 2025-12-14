@@ -25,3 +25,17 @@ ion-toolbar {
     --background: rgba(0, 0, 0, 0.55);
   }
 }
+
+/* Prevent page flicker during navigation */
+ion-tab-bar {
+  contain: layout style paint;
+}
+
+ion-router-outlet {
+  contain: layout style paint;
+}
+
+/* Keep tabs rendered in memory */
+ion-tabs {
+  contain: layout style;
+}

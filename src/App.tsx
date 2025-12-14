@@ -9,8 +9,9 @@ import {
   IonTabs,
   setupIonicReact
 } from '@ionic/react';
+import { IonReactRouter } from '@ionic/react-router';
 import { home, receiptOutline, settingsOutline, timeOutline } from 'ionicons/icons';
-import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom';
+import { Redirect, Route } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Dashboard from './pages/Dashboard';
 import HistoryPage from './pages/History';
@@ -38,13 +39,6 @@ import '@ionic/react/css/padding.css';
 import '@ionic/react/css/text-alignment.css';
 import '@ionic/react/css/text-transformation.css';
 
-/**
- * Ionic Dark Mode
- * -----------------------------------------------------
- * For more info, please see:
- * https://ionicframework.com/docs/theming/dark-mode
- */
-
 /* import '@ionic/react/css/palettes/dark.always.css'; */
 /* import '@ionic/react/css/palettes/dark.class.css'; */
 import '@ionic/react/css/palettes/dark.system.css';
@@ -67,7 +61,41 @@ const updateDarkMode = () => {
 updateDarkMode();
 prefersDark.addEventListener('change', updateDarkMode);
 
-const ProtectedRoutes: React.FC = () => {
+const MainTabs: React.FC = () => {
+  return (
+    <IonTabs>
+      <IonRouterOutlet>
+        <Route exact path="/dashboard" component={Dashboard} />
+        <Route exact path="/history" component={HistoryPage} />
+        <Route exact path="/manage-bills" component={ManageBills} />
+        <Route exact path="/settings" component={Settings} />
+      </IonRouterOutlet>
+      <IonTabBar slot="bottom" className="fixed bottom-4 left-4 right-4 bg-white/60 dark:bg-gray-800/80 backdrop-blur-sm shadow-lg rounded-3xl px-4 py-2 border border-gray-200 dark:border-gray-700">
+        <IonTabButton tab="dashboard" href="/dashboard" className='bg-transparent'>
+          <IonIcon aria-hidden="true" icon={home} />
+          <IonLabel>Home</IonLabel>
+        </IonTabButton>
+        <IonTabButton tab="manage-bills" href="/manage-bills" className='bg-transparent'>
+          <IonIcon aria-hidden="true" icon={receiptOutline} />
+          <IonLabel>Bills</IonLabel>
+        </IonTabButton>
+        <IonTabButton tab="history" href="/history" className='bg-transparent'>
+          <IonIcon aria-hidden="true" icon={timeOutline} />
+          <IonLabel>History</IonLabel>
+        </IonTabButton>
+        <IonTabButton tab="settings" href="/settings" className='bg-transparent'>
+          <IonIcon aria-hidden="true" icon={settingsOutline} />
+          <IonLabel>Settings</IonLabel>
+        </IonTabButton>
+      </IonTabBar>
+    </IonTabs>
+  );
+};
+
+const ProtectedRoute: React.FC<{ component: React.ComponentType<any>; path: string; exact?: boolean }> = ({
+  component: Component,
+  ...rest
+}) => {
   const { user, loading } = useAuth();
 
   if (loading) {
@@ -78,93 +106,54 @@ const ProtectedRoutes: React.FC = () => {
     );
   }
 
-  if (!user) {
-    return <Redirect to="/login" />;
-  }
-
   return (
-    <IonTabs>
-      <IonRouterOutlet>
-        <Route exact path="/dashboard">
-          <Dashboard />
-        </Route>
-        <Route exact path="/history">
-          <HistoryPage />
-        </Route>
-        <Route exact path="/manage-bills">
-          <ManageBills />
-        </Route>
-        <Route path="/settings">
-          <Settings />
-        </Route>
-        <Route exact path="/">
-          <Redirect to="/dashboard" />
-        </Route>
-      </IonRouterOutlet>
-      <IonTabBar slot="bottom" className="fixed bottom-4 left-4 right-4 bg-white/60 dark:bg-gray-800/80 backdrop-blur-sm shadow-lg rounded-3xl px-4 py-2 border border-gray-200 dark:border-gray-700">
-        <IonTabButton tab="dashboard" href="/dashboard" className="bg-transparent">
-          <IonIcon aria-hidden="true" icon={home} />
-          <IonLabel>Home</IonLabel>
-        </IonTabButton>
-        <IonTabButton tab="manage-bills" href="/manage-bills" className="bg-transparent">
-          <IonIcon aria-hidden="true" icon={receiptOutline} />
-          <IonLabel>Bills</IonLabel>
-        </IonTabButton>
-        <IonTabButton tab="history" href="/history" className="bg-transparent">
-          <IonIcon aria-hidden="true" icon={timeOutline} />
-          <IonLabel>History</IonLabel>
-        </IonTabButton>
-        <IonTabButton tab="settings" href="/settings" className="bg-transparent">
-          <IonIcon aria-hidden="true" icon={settingsOutline} />
-          <IonLabel>Settings</IonLabel>
-        </IonTabButton>
-      </IonTabBar>
-    </IonTabs>
+    <Route
+      {...rest}
+      render={(props) =>
+        user ? <Component {...props} /> : <Redirect to="/login" />
+      }
+    />
   );
 };
 
-const App: React.FC = () => (
-  <>
+const App: React.FC = () => {
+  const hasOnboarded = localStorage.getItem('hasOnboarded') === 'true';
+
+  return (
     <IonApp>
       <AuthProvider>
-        <BrowserRouter>
-          <Switch>
-            {/* First-time onboarding, only when not logged in and not completed */}
-            <Route exact path="/onboarding">
-              <Onboarding />
-            </Route>
-            <Route exact path="/onboarding/currency">
-              <SelectCurrency />
-            </Route>
-            <Route exact path="/onboarding/add-bill">
-              <AddFirstBill />
-            </Route>
-            <Route exact path="/login">
-              <Login />
-            </Route>
-            <Route exact path="/signup">
-              <Signup />
-            </Route>
-            <Route path="/">
-              <Route
-                exact
-                path="/"
-                render={() => {
-                  const hasOnboarded = localStorage.getItem('hasOnboarded') === 'true';
-                  return hasOnboarded ? (
-                    <Redirect to="/dashboard" />
-                  ) : (
-                    <Redirect to="/onboarding" />
-                  );
-                }}
-              />
-              <ProtectedRoutes />
-            </Route>
-          </Switch>
-        </BrowserRouter>
+        <IonReactRouter>
+          <IonRouterOutlet>
+            {/* Public routes */}
+            <Route exact path="/onboarding" component={Onboarding} />
+            <Route exact path="/onboarding/currency" component={SelectCurrency} />
+            <Route exact path="/onboarding/add-bill" component={AddFirstBill} />
+            <Route exact path="/login" component={Login} />
+            <Route exact path="/signup" component={Signup} />
+
+            {/* Root redirect */}
+            <Route
+              exact
+              path="/"
+              render={() => {
+                return hasOnboarded ? (
+                  <Redirect to="/dashboard" />
+                ) : (
+                  <Redirect to="/onboarding" />
+                );
+              }}
+            />
+
+            {/* Protected tab routes */}
+            <ProtectedRoute path="/dashboard" component={MainTabs} />
+            <ProtectedRoute path="/history" component={MainTabs} />
+            <ProtectedRoute path="/manage-bills" component={MainTabs} />
+            <ProtectedRoute path="/settings" component={MainTabs} />
+          </IonRouterOutlet>
+        </IonReactRouter>
       </AuthProvider>
     </IonApp>
-  </>
-);
+  );
+};
 
 export default App;
