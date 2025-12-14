@@ -471,7 +471,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <IonPage>
-      <IonHeader>
+      <IonHeader translucent={true}>
         <IonToolbar>
           <IonTitle>Hi, {userProfile?.name || 'User'}</IonTitle>
           {import.meta.env.DEV && (

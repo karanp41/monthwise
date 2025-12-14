@@ -14,3 +14,14 @@ label,
   background: none !important;
   border: none !important;
 } */
+
+ion-toolbar {
+  --background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: saturate(180%) blur(20px);
+}
+
+.dark {
+  ion-toolbar {
+    --background: rgba(0, 0, 0, 0.55);
+  }
+}
