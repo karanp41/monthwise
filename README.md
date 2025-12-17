@@ -17,10 +17,16 @@ linear-gradient(to right, rgb(108, 195, 244) 0%, rgb(128, 171, 233) 17%, rgb(178
 
 ## TODO
 
-- App icon
-- Splash Screen
-- App intro slider
-- First time user journey
-- Notification
-- Emoji -> Icon
-- Loader on toggle
+- App icon                                      - DONE
+- Splash Screen                                 - DONE
+- App intro slider                              - DONE
+- First time user journey                       - DONE
+- Notification                                  - DONE
+- Emoji -> Icon                                 - PENDING
+- Loader on toggle                              - DONE
+- Move This Month List to calender toggle       - DONE
+- Confirm on toggle back                        - DONE
+- Router flickering issue                       - DONE
+- Google Login                                  - PENDING
+- Fix local notification
+- Home: Monthly summary + progress bar (Paid vs Pending)

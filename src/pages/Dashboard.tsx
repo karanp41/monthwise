@@ -564,7 +564,7 @@ const Dashboard: React.FC = () => {
                   return (
                     <div className="calendar-icons" style={{ minHeight: 18, paddingTop: 2 }}>
                       {bills.map((bill: BillWithPaymentStatus, idx: number) => (
-                        <span key={bill.id} style={{ marginLeft: idx > 0 ? 2 : 0, paddingRight: 6, fontSize: 12, zIndex: 10 - idx, position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+                        <span key={bill.id} style={{ marginLeft: idx > 0 ? 2 : 0, paddingRight: 0, fontSize: 8, zIndex: 10 - idx, position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
                           {getCategoryName(bill.category_id, categories).split(' ')[0]}
                           {/* <small style={{ fontSize: 8, marginLeft: 1, fontWeight: 'bold' }}>
                             {bill.is_current_month_paid ? 'P' : 'U'}

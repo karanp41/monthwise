@@ -6,6 +6,7 @@ import {
   IonItem,
   IonLabel,
   IonList,
+  IonLoading,
   IonPage,
   IonSelect,
   IonSelectOption,
@@ -23,6 +24,7 @@ import './Settings.css';
 
 const Settings: React.FC = () => {
   const { user, signOut } = useAuth();
+  const [signingOut, setSigningOut] = useState(false);
   const [userProfile, setUserProfile] = useState<User | null>(null);
   const [selectedCurrency, setSelectedCurrency] = useState<string>('USD');
   const [presentToast] = useIonToast();
@@ -69,6 +71,18 @@ const Settings: React.FC = () => {
     }
   };
 
+  const handleSignOut = async () => {
+    setSigningOut(true);
+    try {
+      await signOut();
+    } catch (err) {
+      console.error('Sign out failed', err);
+      presentToast({ message: 'Failed to sign out', duration: 2000, color: 'danger' });
+    } finally {
+      setSigningOut(false);
+    }
+  };
+
   return (
     <IonPage>
       <IonHeader>
@@ -77,6 +91,7 @@ const Settings: React.FC = () => {
         </IonToolbar>
       </IonHeader>
       <IonContent fullscreen>
+        <IonLoading isOpen={signingOut} message={'Signing out...'} />
         <IonList inset={true} className='!rounded-2xl shadow-md'>
           <IonItem>
             <IonLabel>
@@ -84,8 +99,6 @@ const Settings: React.FC = () => {
               <p>{user?.email || 'Guest'}</p>
             </IonLabel>
           </IonItem>
-
-
           <IonItem>
             <IonLabel position="stacked">Default Currency</IonLabel>
             <IonSelect
@@ -103,7 +116,7 @@ const Settings: React.FC = () => {
           </IonItem>
 
           <div className="p-4 border-t mt-4">
-            <IonButton expand="block" color="danger" onClick={signOut}>
+            <IonButton expand="block" color="danger" onClick={handleSignOut}>
               <IonIcon slot="start" icon={logOutOutline} />
               Sign Out
             </IonButton>

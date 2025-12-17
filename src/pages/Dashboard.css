@@ -114,7 +114,7 @@
 
 .react-calendar__tile {
   max-width: 100%;
-  padding: 0.75em 0.5em;
+  padding: 0.5em 0.5em;
   background: none;
   text-align: center;
   line-height: 16px;
@@ -141,58 +141,50 @@
 }
 
 .react-calendar__tile--now {
-  background: #ffff76;
+  /* keep tile background transparent; visual indicator on the date bubble */
 }
 
-.dark .react-calendar__tile--now {
-  background: #fbbf24; /* amber-400 */
+.react-calendar__tile--now abbr {
+  background: #fbbf24; /* amber */
+  color: #000;
 }
 
-.react-calendar__tile--now:enabled:hover,
-.react-calendar__tile--now:enabled:focus {
-  background: #ffffa9;
-}
-
-.dark .react-calendar__tile--now:enabled:hover,
-.dark .react-calendar__tile--now:enabled:focus {
+.react-calendar__tile--now:enabled:hover abbr,
+.react-calendar__tile--now:enabled:focus abbr {
   background: #f59e0b; /* amber-500 */
 }
 
 .react-calendar__tile--hasActive {
-  background: rgb(178, 109, 205);
 }
 
-.dark .react-calendar__tile--hasActive {
+.react-calendar__tile--hasActive abbr {
   background: rgb(178, 109, 205);
+  color: #fff;
 }
 
-.react-calendar__tile--hasActive:enabled:hover,
-.react-calendar__tile--hasActive:enabled:focus {
+.react-calendar__tile--hasActive:enabled:hover abbr,
+.react-calendar__tile--hasActive:enabled:focus abbr {
   background: rgb(200, 130, 220);
 }
 
-.dark .react-calendar__tile--hasActive:enabled:hover,
-.dark .react-calendar__tile--hasActive:enabled:focus {
+.dark .react-calendar__tile--hasActive abbr {
   background: rgb(160, 90, 190);
 }
 
 .react-calendar__tile--active {
+}
+
+.react-calendar__tile--active abbr {
   background: rgb(87, 46, 255);
   color: white;
 }
 
-.dark .react-calendar__tile--active {
-  background: rgb(87, 46, 255);
-  color: white;
-}
-
-.react-calendar__tile--active:enabled:hover,
-.react-calendar__tile--active:enabled:focus {
+.react-calendar__tile--active:enabled:hover abbr,
+.react-calendar__tile--active:enabled:focus abbr {
   background: rgb(108, 75, 255);
 }
 
-.dark .react-calendar__tile--active:enabled:hover,
-.dark .react-calendar__tile--active:enabled:focus {
+.dark .react-calendar__tile--active abbr {
   background: rgb(76, 40, 224);
 }
 
@@ -206,43 +198,81 @@
 
 /* Custom tile classes for bill status */
 .calendar-tile-overdue {
-  background-color: #fee2e2 !important; /* light red */
-  color: #991b1b !important; /* dark red text */
+  /* keep tile background transparent; apply visual indicator on the date number bubble */
 }
 
 .dark .calendar-tile-overdue {
-  background-color: #7f1d1d !important; /* dark red-900 */
-  color: #fca5a5 !important; /* light red text */
 }
 
 .calendar-tile-due-soon {
-  background-color: #fef3c7 !important; /* light yellow */
-  color: #92400e !important; /* dark amber text */
 }
 
 .dark .calendar-tile-due-soon {
-  background-color: #78350f !important; /* dark amber-900 */
-  color: #fcd34d !important; /* light amber text */
 }
 
 .calendar-tile-all-paid {
-  background-color: #d1fae5 !important; /* light green */
-  color: #166534 !important; /* dark green text */
 }
 
 .dark .calendar-tile-all-paid {
-  background-color: #14532d !important; /* dark green-900 */
-  color: #86efac !important; /* light green text */
 }
 
 .calendar-tile-unpaid-later {
-  background-color: #e9d5f5 !important; /* light purple */
-  color: #572eff !important; /* primary purple text */
 }
 
 .dark .calendar-tile-unpaid-later {
+}
+
+/* Date number bubble common styling */
+.react-calendar__tile abbr {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  line-height: 28px;
+  border-radius: 9999px;
+  margin: 0 auto;
+  font-weight: 600;
+}
+
+.calendar-tile-overdue abbr {
+  background-color: #991b1b !important; /* dark red */
+  color: #fff !important;
+}
+
+.dark .calendar-tile-overdue abbr {
+  background-color: #7f1d1d !important; /* dark red-900 */
+  color: #fff !important;
+}
+
+.calendar-tile-due-soon abbr {
+  background-color: #92400e !important; /* dark amber */
+  color: #fff !important;
+}
+
+.dark .calendar-tile-due-soon abbr {
+  background-color: #78350f !important; /* dark amber-900 */
+  color: #fff !important;
+}
+
+.calendar-tile-all-paid abbr {
+  background-color: #059669 !important; /* emerald */
+  color: #fff !important;
+}
+
+.dark .calendar-tile-all-paid abbr {
+  background-color: #14532d !important; /* dark green-900 */
+  color: #fff !important;
+}
+
+.calendar-tile-unpaid-later abbr {
+  background-color: #6d28d9 !important; /* purple */
+  color: #fff !important;
+}
+
+.dark .calendar-tile-unpaid-later abbr {
   background-color: #4a2989 !important; /* dark purple-900 */
-  color: #c9a8ff !important; /* light purple text */
+  color: #fff !important;
 }
 
 .calendar-icons {
@@ -254,13 +284,13 @@
 
 .calendar-icons span {
   display: inline-block;
-  width: 16px;
-  height: 16px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   background: linear-gradient(135deg, rgb(108, 195, 244) 0%, rgb(178, 109, 205) 50%, rgb(250, 21, 166) 100%);
   color: white;
   text-align: center;
-  line-height: 16px;
+  line-height: 11px;
   font-size: 10px;
   font-weight: bold;
 }
