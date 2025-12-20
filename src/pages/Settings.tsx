@@ -1,4 +1,5 @@
 import {
+  IonAlert,
   IonButton,
   IonContent,
   IonHeader,
@@ -25,6 +26,7 @@ import './Settings.css';
 const Settings: React.FC = () => {
   const { user, signOut } = useAuth();
   const [signingOut, setSigningOut] = useState(false);
+  const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
   const [userProfile, setUserProfile] = useState<User | null>(null);
   const [selectedCurrency, setSelectedCurrency] = useState<string>('USD');
   const [presentToast] = useIonToast();
@@ -92,6 +94,27 @@ const Settings: React.FC = () => {
       </IonHeader>
       <IonContent fullscreen>
         <IonLoading isOpen={signingOut} message={'Signing out...'} />
+        <IonAlert
+          isOpen={showSignOutConfirm}
+          header={'Confirm Sign Out'}
+          message={`Are you sure you want to sign out${user?.email ? ` from ${user.email}` : ''}?`}
+          buttons={[
+            {
+              text: 'Cancel',
+              role: 'cancel',
+              handler: () => setShowSignOutConfirm(false),
+            },
+            {
+              text: 'Sign Out',
+              role: 'destructive',
+              handler: async () => {
+                setShowSignOutConfirm(false);
+                await handleSignOut();
+              },
+            },
+          ]}
+          onDidDismiss={() => setShowSignOutConfirm(false)}
+        />
         <IonList inset={true} className='!rounded-2xl shadow-md'>
           <IonItem>
             <IonLabel>
@@ -116,7 +139,12 @@ const Settings: React.FC = () => {
           </IonItem>
 
           <div className="p-4 border-t mt-4">
-            <IonButton expand="block" color="danger" onClick={handleSignOut}>
+            <IonButton
+              expand="block"
+              color="danger"
+              onClick={() => setShowSignOutConfirm(true)}
+              disabled={signingOut}
+            >
               <IonIcon slot="start" icon={logOutOutline} />
               Sign Out
             </IonButton>
