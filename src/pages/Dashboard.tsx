@@ -657,14 +657,16 @@ const Dashboard: React.FC = () => {
               <IonHeader>
                 <IonToolbar>
                   <IonTitle>
-                    Bills for {selectedDate ? selectedDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : ''}
+                    Pending Bills
                   </IonTitle>
                   <IonButtons slot="end">
                     <IonButton onClick={() => setShowBillModal(false)} color={'danger'}>Close</IonButton>
                   </IonButtons>
                 </IonToolbar>
               </IonHeader>
-              <IonContent>
+              <IonContent className="ion-padding">
+                <h2 className="text-xl font-semibold mb-4">{selectedDate ? selectedDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : ''}
+                </h2>
                 {selectedDate && (
                   <IonList>
                     {(() => {

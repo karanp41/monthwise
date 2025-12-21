@@ -236,7 +236,7 @@
 }
 
 .calendar-tile-overdue abbr {
-  background-color: #991b1b !important; /* dark red */
+  background-color: rgb(239 68 68 / 0.8) !important; /* dark red */
   color: #fff !important;
 }
 
@@ -246,7 +246,7 @@
 }
 
 .calendar-tile-due-soon abbr {
-  background-color: #92400e !important; /* dark amber */
+  background-color: rgb(250 204 21 / 0.6) !important; /* dark amber */
   color: #fff !important;
 }
 
@@ -266,7 +266,7 @@
 }
 
 .calendar-tile-unpaid-later abbr {
-  background-color: #6d28d9 !important; /* purple */
+  background-color: gray ;
   color: #fff !important;
 }
 
@@ -287,7 +287,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: linear-gradient(135deg, rgb(108, 195, 244) 0%, rgb(178, 109, 205) 50%, rgb(250, 21, 166) 100%);
+  /* background: linear-gradient(135deg, rgb(108, 195, 244) 0%, rgb(178, 109, 205) 50%, rgb(250, 21, 166) 100%); */
   color: white;
   text-align: center;
   line-height: 11px;
