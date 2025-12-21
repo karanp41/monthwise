@@ -54,7 +54,7 @@ const Login: React.FC = () => {
                             alt="MonthWise Logo"
                             className="mx-auto h-40 w-auto mb-2"
                         />
-                        <h2 className="text-center text-gray-800 text-xl font-semibold mt-2">Welcome to MonthWise</h2>
+                        <h2 className="text-center text-gray-800 text-xl font-semibold mt-2 dark:text-white">Welcome to MonthWise</h2>
                         <p className="text-center text-gray-500 text-sm">Smart Bill and EMI Reminder</p>
                     </div>
                     <IonCard className="w-full max-w-md rounded-2xl shadow-md">
