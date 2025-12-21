@@ -48,11 +48,15 @@ const Login: React.FC = () => {
         <IonPage>
             <IonContent className="ion-padding">
                 <div className="flex flex-col items-center justify-center min-h-full">
-                    <img
-                        src="/monthwise-logo-tagline-cropped.png"
-                        alt="MonthWise Logo"
-                        className="mx-auto h-40 w-auto mb-2"
-                    />
+                    <div>
+                        <img
+                            src="/monthwise-only-logo.png"
+                            alt="MonthWise Logo"
+                            className="mx-auto h-40 w-auto mb-2"
+                        />
+                        <h2 className="text-center text-gray-800 text-xl font-semibold mt-2">Welcome to MonthWise</h2>
+                        <p className="text-center text-gray-500 text-sm">Smart Bill and EMI Reminder</p>
+                    </div>
                     <IonCard className="w-full max-w-md rounded-2xl shadow-md">
                         <IonCardHeader className="text-center">
                             {/* <IonCardTitle className="text-center text-2xl">

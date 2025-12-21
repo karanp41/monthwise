@@ -29,6 +29,7 @@ import { useAuth } from '../context/AuthContext';
 import { Bill, Category, User } from '../models/types';
 import { billService } from '../services/billService';
 import { categoryService } from '../services/categoryService';
+import { reminderService } from '../services/reminderService';
 import { userService } from '../services/userService';
 import { getCategoryName, getCurrencySymbol } from '../services/utilService';
 
@@ -90,14 +91,27 @@ const ManageBills: React.FC = () => {
         }
     }, [userProfile]);
 
-    const handleAddBill = async (data: Omit<Bill, 'id' | 'created_at' | 'updated_at' | 'user_id' | 'is_paid'>) => {
+    const handleAddBill = async (data: Omit<Bill, 'id' | 'created_at' | 'updated_at' | 'user_id' | 'is_paid'> & { reminder?: string }) => {
         if (user) {
             try {
-                await billService.addBill({
-                    ...data,
+                // Remove `reminder` from bill payload (it's not a column on `bills`)
+                const { reminder, ...billData } = data as any;
+                const notify_before_days = reminder === 'never' || !reminder ? 0 : parseInt(reminder, 10);
+
+                const newBill = await billService.addBill({
+                    ...billData,
                     user_id: user.id,
                     is_paid: false,
                 });
+
+                // If the user requested reminders, create and schedule them
+                if (notify_before_days > 0) {
+                    await reminderService.createReminder({
+                        bill_id: newBill.id,
+                        notify_before_days,
+                    });
+                }
+                await reminderService.scheduleBillReminders({ ...newBill, notify_before_days });
                 setShowAddModal(false);
                 fetchData();
                 presentToast({

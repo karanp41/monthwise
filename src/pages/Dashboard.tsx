@@ -22,6 +22,7 @@ import {
   IonSegmentButton,
   IonSkeletonText,
   IonSpinner,
+  IonText,
   IonTitle,
   IonToggle,
   IonToolbar,
@@ -425,6 +426,18 @@ const Dashboard: React.FC = () => {
     });
   };
 
+  // Current month stats for progress bar
+  const currentMonthBillsList = React.useMemo(() => getCurrentMonthBills(), [bills]);
+  const currentMonthStats = React.useMemo(() => {
+    const total = currentMonthBillsList.length;
+    const paid = currentMonthBillsList.filter(b => b.current_month_paid).length;
+    const totalAmount = currentMonthBillsList.reduce((s, b) => s + b.amount, 0);
+    const paidAmount = currentMonthBillsList.filter(b => b.current_month_paid).reduce((s, b) => s + b.amount, 0);
+    const percentCount = total === 0 ? 0 : Math.round((paid / total) * 100);
+    const percentAmount = totalAmount === 0 ? 0 : Math.round((paidAmount / totalAmount) * 100);
+    return { total, paid, totalAmount, paidAmount, percentCount, percentAmount };
+  }, [currentMonthBillsList]);
+
   const renderBillItem = (bill: BillWithPaymentStatus) => (
     <IonItem key={bill.id} lines='none'>
       {togglingBills.has(bill.id) ? (
@@ -469,12 +482,32 @@ const Dashboard: React.FC = () => {
     </IonItem>
   );
 
+  const monthlyProgressBar = () => (
+    <div className="monthly-progress-card mb-4 shadow-md !rounded-2xl bg-white dark:bg-gray-800 p-4">
+      <div className="flex items-center justify-between mb-2">
+        <div className="font-semibold">Monthly Progress</div>
+        <div className="text-sm text-gray-500 dark:text-gray-300">
+          {currentMonthStats.paid}/{currentMonthStats.total} bills
+          {/* • {getCurrencySymbol(currentMonthBillsList[0]?.currency || 'USD')}{currentMonthStats.paidAmount.toFixed(2)} / {getCurrencySymbol(currentMonthBillsList[0]?.currency || 'USD')}{currentMonthStats.totalAmount.toFixed(2)} */}
+        </div>
+      </div>
+      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
+        <div className="h-full bg-emerald-500 dark:bg-emerald-500 transition-all" style={{ width: `${currentMonthStats.percentCount}%` }} />
+      </div>
+      <div className="flex justify-between text-xs text-gray-500 mt-2">
+        <span>Paid ({currentMonthStats.percentCount}%)</span>
+        <span>Amount Paid ({currentMonthStats.percentAmount}%)</span>
+      </div>
+    </div>
+  );
+
   return (
     <IonPage>
       <IonHeader translucent={true}>
         <IonToolbar>
-          <IonTitle>Hi, {userProfile?.name || 'User'}</IonTitle>
-          {import.meta.env.DEV && (
+          {/* <IonTitle>Hi, {userProfile?.name || 'User'}</IonTitle> */}
+          <IonTitle>Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening'}, {userProfile?.name || 'User'}</IonTitle>
+          {/* {import.meta.env.DEV && (
             <IonButtons slot="end">
               <IonButton
                 size="small"
@@ -522,13 +555,23 @@ const Dashboard: React.FC = () => {
                 Trigger Bills
               </IonButton>
             </IonButtons>
-          )}
+          )} */}
         </IonToolbar>
       </IonHeader>
+
       <IonContent fullscreen className="ion-padding">
         <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
           <IonRefresherContent />
         </IonRefresher>
+
+        <IonText className="block mb-4">
+          <h1 className='text-2xl font-bold'>{new Date().toLocaleString('default', { month: 'long', year: 'numeric' }).replace(' ', ', ')}</h1>
+        </IonText>
+
+        {/* Monthly Progress Bar */}
+        {!loading && currentMonthStats.total > 0 && (
+          monthlyProgressBar()
+        )}
 
         {/* View Toggle */}
         <IonSegment
@@ -672,11 +715,10 @@ const Dashboard: React.FC = () => {
               <>
                 {/* Overdue Bills */}
                 {categorizedBills.overdue.length > 0 && (
-                  <IonList inset={true} className="shadow-md !rounded-2xl !m-0 !mb-4 pt-0">
-                    <IonListHeader className="font-semibold bg-red-500">
-                      <div className='flex justify-between w-full pr-4'>
-
-                        <span className='flex gap-2'><IonIcon icon={alertCircleSharp} className='h-5 w-5 text-yellow-400' /> Overdue</span>
+                  <IonList inset={true} className="shadow-md !rounded-2xl !m-0 !mb-4 pt-0 bg-red-500/25">
+                    <IonListHeader className="font-semibold">
+                      <div className='flex justify-between w-full pr-4 text-red-600 dark:text-red-200'>
+                        <span className='flex gap-2'><IonIcon icon={alertCircleSharp} className='h-5 w-5' /> Overdue</span>
                         <span>{categorizedBills.overdue.length} {categorizedBills.overdue.length > 1 ? 'Bills' : 'Bill'}</span>
                       </div>
                     </IonListHeader>
@@ -687,7 +729,7 @@ const Dashboard: React.FC = () => {
                 {/* Due Today */}
                 {categorizedBills.dueToday.length > 0 && (
                   <IonList inset={true} className="shadow-md !rounded-2xl !m-0 !mb-4 pt-0">
-                    <IonListHeader className="font-semibold bg-yellow-300 text-yellow-800 dark:bg-yellow-600 dark:text-white">
+                    <IonListHeader className="font-semibold bg-yellow-400/35 text-yellow-800 dark:bg-yellow-600/60 dark:text-yellow-200">
                       <div className='flex justify-between w-full pr-4'>
                         <span>Due Today</span>
                         <span>{categorizedBills.dueToday.length} {categorizedBills.dueToday.length > 1 ? 'Bills' : 'Bill'}</span>
@@ -700,7 +742,7 @@ const Dashboard: React.FC = () => {
                 {/* Due Tomorrow */}
                 {categorizedBills.dueTomorrow.length > 0 && (
                   <IonList inset={true} className="shadow-md !rounded-2xl !m-0 !mb-4 pt-0">
-                    <IonListHeader className="font-semibold bg-blue-300 text-blue-800 dark:bg-blue-600 dark:text-white">
+                    <IonListHeader className="font-semibold bg-blue-400/35 text-blue-800 dark:bg-blue-600/40 dark:text-blue-200">
                       <div className='flex justify-between w-full pr-4'>
                         <span>Due Tomorrow</span>
                         <span>{categorizedBills.dueTomorrow.length} {categorizedBills.dueTomorrow.length > 1 ? 'Bills' : 'Bill'}</span>
@@ -713,7 +755,7 @@ const Dashboard: React.FC = () => {
                 {/* Due Within 7 Days */}
                 {categorizedBills.dueWithin7Days.length > 0 && (
                   <IonList inset={true} className="shadow-md !rounded-2xl !m-0 !mb-4 pt-0">
-                    <IonListHeader className="font-semibold bg-gray-300 text-gray-800 dark:bg-gray-600 dark:text-white">
+                    <IonListHeader className="font-semibold bg-gray-300 text-gray-800 dark:bg-gray-600 dark:text-gray-200">
                       <div className='flex justify-between w-full pr-4'>
                         <span>Due Within 7 Days</span>
                         <span>{categorizedBills.dueWithin7Days.length} {categorizedBills.dueWithin7Days.length > 1 ? 'Bills' : 'Bill'}</span>
@@ -726,7 +768,7 @@ const Dashboard: React.FC = () => {
                 {/* Due Next 15 Days */}
                 {categorizedBills.dueNext15Days.length > 0 && (
                   <IonList inset={true} className="shadow-md !rounded-2xl !m-0 !mb-4 pt-0">
-                    <IonListHeader className="font-semibold bg-green-300 text-green-800 dark:bg-green-600 dark:text-white">
+                    <IonListHeader className="font-semibold bg-green-400/25 text-green-800 dark:bg-green-600/50 dark:text-green-200">
                       <div className='flex justify-between w-full pr-4'>
                         <span>Due Next 15 Days</span>
                         <span>{categorizedBills.dueNext15Days.length} {categorizedBills.dueNext15Days.length > 1 ? 'Bills' : 'Bill'}</span>

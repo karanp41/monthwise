@@ -299,3 +299,12 @@
   background: linear-gradient(135deg, rgb(108, 195, 244) 0%, rgb(178, 109, 205) 50%, rgb(250, 21, 166) 100%);
   color: #f9fafb; /* gray-50 */
 }
+
+/* Monthly progress styles */
+.monthly-progress-card {
+  /* Slight elevation, handled by utility classes; keep a small padding tweak here */
+}
+
+.monthly-progress-card .transition-all {
+  transition: width 450ms cubic-bezier(.2,.8,.2,1);
+}

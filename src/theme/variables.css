@@ -16,12 +16,12 @@ http://ionicframework.com/docs/theming/ */
   );
   
   /* Primary color values from gradient */
-  --primary-color: rgb(87, 46, 255);
-  --primary-color-rgb: 87, 46, 255;
-  
+  --primary-color: rgb(5 150 105);
+  --primary-color-rgb: 5, 150, 105;
+
   /* Override Ionic primary color */
-  --ion-color-primary: #572eff;
-  --ion-color-primary-rgb: 87, 46, 255;
+  --ion-color-primary: #059667;
+  --ion-color-primary-rgb: 5, 150, 105;
   --ion-color-primary-contrast: #ffffff;
   --ion-color-primary-contrast-rgb: 255, 255, 255;
   --ion-color-primary-shade: rgb(76, 40, 224);
@@ -47,24 +47,24 @@ http://ionicframework.com/docs/theming/ */
 
 /* Apply gradient to buttons */
 ion-button:not([fill="clear"]):not([fill="outline"]) {
-  --background: var(--accent-gradient);
-  --background-activated: var(--accent-gradient);
-  --background-focused: var(--accent-gradient);
-  --background-hover: var(--accent-gradient);
+  --background: var(--primary-color);
+  --background-activated: var(--primary-color);
+  --background-focused: var(--primary-color);
+  --background-hover: var(--primary-color);
   font-weight: 600;
 }
 
 ion-fab-button {
-  --background: var(--accent-gradient);
-  --background-activated: var(--accent-gradient);
-  --background-focused: var(--accent-gradient);
-  --background-hover: var(--accent-gradient);
+  --background: var(--primary-color);
+  --background-activated: var(--primary-color);
+  --background-focused: var(--primary-color);
+  --background-hover: var(--primary-color);
 }
 
 /* Segment button active state with gradient */
 ion-segment-button.segment-button-checked {
   --indicator-color: transparent;
-  background: var(--accent-gradient);
+  background: var(--primary-color);
   color: white;
   border-radius: 12px;
 }
