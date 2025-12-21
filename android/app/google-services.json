@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "190042960954",
+    "project_id": "monthwise-6348d",
+    "storage_bucket": "monthwise-6348d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:190042960954:android:a34dd26e78cef1e9447103",
+        "android_client_info": {
+          "package_name": "io.monthwise.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB9kH4mrWm2cHctmykLOQ_xAPAR21BnDI4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
