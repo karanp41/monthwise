@@ -1,4 +1,4 @@
-package io.ionic.starter;
+package io.monthwise.app;
 
 import com.getcapacitor.BridgeActivity;
 

@@ -1,3 +1,4 @@
+import { PushNotifications } from '@capacitor/push-notifications';
 import {
   IonApp,
   IonIcon,
@@ -7,10 +8,12 @@ import {
   IonTabBar,
   IonTabButton,
   IonTabs,
+  IonToast,
   setupIonicReact
 } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import { home, receiptOutline, settingsOutline, timeOutline } from 'ionicons/icons';
+import React, { useEffect, useState } from 'react';
 import { Redirect, Route } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Dashboard from './pages/Dashboard';
@@ -118,6 +121,81 @@ const ProtectedRoute: React.FC<{ component: React.ComponentType<any>; path: stri
 
 const App: React.FC = () => {
   const hasOnboarded = localStorage.getItem('hasOnboarded') === 'true';
+  const [toastOpen, setToastOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+
+  useEffect(() => {
+    let registrationListener: any = null;
+    let regErrorListener: any = null;
+    let receivedListener: any = null;
+    let actionListener: any = null;
+
+    const initializePush = async () => {
+      try {
+        // 1. Check/request permissions
+        let permStatus = await PushNotifications.checkPermissions();
+
+        if (permStatus.receive === 'prompt') {
+          permStatus = await PushNotifications.requestPermissions();
+        }
+
+        if (permStatus.receive !== 'granted') {
+          console.log('Push permissions not granted');
+          return;
+        }
+
+        // 2. Register with APNs/FCM
+        await PushNotifications.register();
+
+        // 3. Listeners
+        registrationListener = PushNotifications.addListener('registration', token => {
+          console.log('Push registration success, token: ' + token.value);
+          // TODO: send token.value to your backend to save for sending pushes
+        });
+
+        regErrorListener = PushNotifications.addListener('registrationError', err => {
+          console.error('Push registration error: ', err);
+        });
+
+        receivedListener = PushNotifications.addListener('pushNotificationReceived', notification => {
+          console.log('Push received: ', notification);
+          // Show an in-app toast when a notification arrives while app is in foreground
+          const title = (notification?.title) ? `${notification.title}` : '';
+          const body = (notification?.body) ? `${notification.body}` : '';
+          const msg = title ? `${title} — ${body}` : body || JSON.stringify(notification?.data || notification);
+          setToastMessage(msg);
+          setToastOpen(true);
+        });
+
+        actionListener = PushNotifications.addListener('pushNotificationActionPerformed', action => {
+          console.log('Push action performed: ', action);
+          // You can navigate based on `action.notification.data` if needed
+          const title = (action?.notification?.title) ? `${action.notification.title}` : '';
+          const body = (action?.notification?.body) ? `${action.notification.body}` : '';
+          const msg = title ? `${title} — ${body}` : body || JSON.stringify(action?.notification?.data || action);
+          setToastMessage(msg);
+          setToastOpen(true);
+        });
+      } catch (e) {
+        console.error('Error initializing push notifications', e);
+      }
+    };
+
+    initializePush();
+
+    return () => {
+      // cleanup listeners
+      try {
+        registrationListener?.remove?.();
+        regErrorListener?.remove?.();
+        receivedListener?.remove?.();
+        actionListener?.remove?.();
+      } catch (e: any) {
+        console.error('Error cleaning up push listeners', e);
+        // ignore cleanup errors
+      }
+    };
+  }, []);
 
   return (
     <IonApp>
@@ -152,6 +230,12 @@ const App: React.FC = () => {
           </IonRouterOutlet>
         </IonReactRouter>
       </AuthProvider>
+      <IonToast
+        isOpen={toastOpen}
+        message={toastMessage}
+        onDidDismiss={() => setToastOpen(false)}
+        duration={4000}
+      />
     </IonApp>
   );
 };

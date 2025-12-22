@@ -13,6 +13,8 @@ linear-gradient(to right, rgb(108, 195, 244) 0%, rgb(128, 171, 233) 17%, rgb(178
 
 ```export PATH="/opt/homebrew/opt/openjdk@21/bin:$PATH" && npx cap run android```
 
+```npx cap sync android```
+
 ```npm run build && export PATH="/opt/homebrew/opt/openjdk@21/bin:$PATH" && npx cap run android```
 
 ## TODO
@@ -28,5 +30,8 @@ linear-gradient(to right, rgb(108, 195, 244) 0%, rgb(128, 171, 233) 17%, rgb(178
 - Confirm on toggle back                        - DONE
 - Router flickering issue                       - DONE
 - Google Login                                  - PENDING
-- Fix local notification
+- Fix local notification                        - PENDING
+- FCM                                           - PENDING
+- Welcome E-Mail                                - PENDING
+
 - Home: Monthly summary + progress bar (Paid vs Pending)
