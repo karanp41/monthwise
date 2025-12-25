@@ -32,6 +32,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 const session = data?.session ?? null;
                 setSession(session);
                 setUser(session?.user ?? null);
+                // If there is a pending push token (saved before login), attach it now
+                try {
+                    const pending = localStorage.getItem('pendingPushToken');
+                    const userId = session?.user?.id;
+                    if (pending && userId) {
+                        await userService.savePushToken(userId, pending);
+                        localStorage.removeItem('pendingPushToken');
+                    }
+                } catch (e) {
+                    console.error('Failed to attach pending push token on init', e);
+                }
             } catch (error) {
                 console.error('Unexpected error while initializing auth session', error);
                 if (!isMounted) return;
@@ -46,10 +57,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         initializeSession();
 
-        const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+        const { data: authListener } = supabase.auth.onAuthStateChange(async (_event, session) => {
             if (!isMounted) return;
             setSession(session);
             setUser(session?.user ?? null);
+            // Attach pending token if present (user just signed in)
+            try {
+                const pending = localStorage.getItem('pendingPushToken');
+                const userId = session?.user?.id;
+                if (pending && userId) {
+                    await userService.savePushToken(userId, pending);
+                    localStorage.removeItem('pendingPushToken');
+                }
+            } catch (e) {
+                console.error('Failed to attach pending push token on auth state change', e);
+            }
             setLoading(false);
         });
 
@@ -82,6 +104,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
             // Create default categories for the new user
             // await categoryService.createDefaultCategories(data.user.id);
+            // If there was a pending push token saved before signup, attach it to this new user
+            try {
+                const pending = localStorage.getItem('pendingPushToken');
+                if (pending) {
+                    await userService.savePushToken(data.user.id, pending);
+                    localStorage.removeItem('pendingPushToken');
+                }
+            } catch (e) {
+                console.error('Failed to attach pending push token after signup', e);
+            }
         }
     };
 

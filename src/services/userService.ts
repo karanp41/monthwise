@@ -63,5 +63,51 @@ export const userService = {
 
         if (error) throw error;
         return data as User;
+    },
+
+    /**
+     * Save a device push token for a user. This writes to `user_push_tokens` table
+     * (preferred) and falls back to updating the `users` table's `push_token` field
+     * if that table does not exist.
+     */
+    async savePushToken(userId: string, token: string, platform?: string) {
+        // Try writing to a dedicated tokens table first (recommended).
+        try {
+            const { data, error } = await supabase
+                .from('user_push_tokens')
+                .upsert(
+                    {
+                        user_id: userId,
+                        token,
+                        platform: platform || null,
+                        last_seen_at: new Date().toISOString(),
+                        is_active: true,
+                    },
+                    { onConflict: 'token' }
+                )
+                .select()
+                .single();
+
+            if (error) throw error;
+            return data;
+        } catch (e: any) {
+            console.error('Failed to save push token in user_push_tokens table', e);
+
+            // Fallback: if the `user_push_tokens` table isn't available, store token on users table.
+            try {
+                const { data, error } = await supabase
+                    .from('users')
+                    .update({ push_token: token, push_token_last_seen_at: new Date().toISOString() })
+                    .eq('id', userId)
+                    .select()
+                    .single();
+
+                if (error) throw error;
+                return data as User;
+            } catch (err) {
+                console.error('Failed to save push token in fallback users table', err);
+                throw err;
+            }
+        }
     }
 };

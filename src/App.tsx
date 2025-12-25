@@ -25,6 +25,8 @@ import AddFirstBill from './pages/onboarding/AddFirstBill';
 import SelectCurrency from './pages/onboarding/SelectCurrency';
 import Settings from './pages/Settings';
 import Signup from './pages/Signup';
+import { supabase } from './services/supabase';
+import { userService } from './services/userService';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -148,9 +150,22 @@ const App: React.FC = () => {
         await PushNotifications.register();
 
         // 3. Listeners
-        registrationListener = PushNotifications.addListener('registration', token => {
+        registrationListener = PushNotifications.addListener('registration', async (token) => {
           console.log('Push registration success, token: ' + token.value);
-          // TODO: send token.value to your backend to save for sending pushes
+          try {
+            const { data } = await supabase.auth.getUser();
+            const userId = data?.user?.id ?? null;
+            if (userId) {
+              // Save token to the backend for this authenticated user
+              await userService.savePushToken(userId, token.value);
+            } else {
+              // No user yet — persist locally and attach after signup/login
+              localStorage.setItem('pendingPushToken', token.value);
+            }
+          } catch (e) {
+            console.error('Error saving push token', e);
+            localStorage.setItem('pendingPushToken', token.value);
+          }
         });
 
         regErrorListener = PushNotifications.addListener('registrationError', err => {
