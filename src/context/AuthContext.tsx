@@ -10,6 +10,7 @@ interface AuthContextType {
     signIn: (email: string, password: string) => Promise<void>;
     signUp: (email: string, password: string, name: string) => Promise<void>;
     signOut: () => Promise<void>;
+    deleteAccount: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -127,6 +128,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
     };
 
+    const deleteAccount = async () => {
+        if (!user?.id) throw new Error('No user session found');
+
+        // Delete user record from database
+        await userService.deleteUser(user.id);
+
+        // Delete auth account
+        await supabase.auth.admin.deleteUser(user.id);
+
+        // Clear stored user profiles
+        Object.keys(localStorage).forEach(key => {
+            if (key.startsWith('userProfile_')) {
+                localStorage.removeItem(key);
+            }
+        });
+
+        // Sign out
+        await supabase.auth.signOut();
+    };
+
     const value = {
         session,
         user,
@@ -134,6 +155,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signIn,
         signUp,
         signOut,
+        deleteAccount,
     };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

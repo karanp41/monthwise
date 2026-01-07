@@ -109,5 +109,14 @@ export const userService = {
                 throw err;
             }
         }
-    }
+    },
+
+    async deleteUser(userId: string) {
+        const { error } = await supabase
+            .from('users')
+            .delete()
+            .eq('id', userId);
+
+        if (error) throw error;
+    },
 };
